@@ -161,6 +161,28 @@ classDiagram
 
 **Scénarios alternatifs :** —
 
+```mermaid
+sequenceDiagram
+    participant C as Controller
+    participant I as AddTaskInteractor
+    participant T as DeveloperTask
+    participant R as ITaskRepository
+    participant P as Presenter
+
+    C->>I: Execute(AddTaskRequest)
+    I->>T: TaskTitle.Create(title)
+    alt titre invalide
+        T-->>I: Result.Failure
+        I->>P: PresentValidationError(errors)
+    else titre valide
+        T-->>I: Result.Success(title)
+        I->>T: DeveloperTask.Create(title, now)
+        I->>R: AddAsync(task)
+        I->>P: PresentSuccess(TaskViewModel)
+    end
+    C->>C: return presenter.Result
+```
+
 **Scénarios d'exception :**
 - E1 : titre vide ou composé uniquement d'espaces → erreur de validation, aucune tâche créée.
 - E2 : titre supérieur à 200 caractères → erreur de validation, aucune tâche créée.
@@ -188,6 +210,20 @@ classDiagram
 
 **Scénarios alternatifs :**
 - A1 : aucune tâche existante → le système retourne une liste vide.
+
+```mermaid
+sequenceDiagram
+    participant C as Controller
+    participant I as ListTasksInteractor
+    participant R as ITaskRepository
+    participant P as Presenter
+
+    C->>I: Execute(ListTasksRequest)
+    I->>R: GetAllAsync()
+    R-->>I: tasks (ordonnées par CreatedAt)
+    I->>P: PresentSuccess(IEnumerable~TaskViewModel~)
+    C->>C: return presenter.Result
+```
 
 **Scénarios d'exception :** —
 
@@ -262,6 +298,26 @@ sequenceDiagram
 1. Le développeur désigne une tâche à supprimer (par son identifiant).
 2. Le système vérifie que la tâche existe.
 3. Le système supprime la tâche.
+
+```mermaid
+sequenceDiagram
+    participant C as Controller
+    participant I as DeleteTaskInteractor
+    participant R as ITaskRepository
+    participant P as Presenter
+
+    C->>I: Execute(DeleteTaskRequest)
+    I->>R: GetByIdAsync(id)
+    alt tâche introuvable
+        R-->>I: null
+        I->>P: PresentNotFound()
+    else tâche trouvée
+        R-->>I: task
+        I->>R: DeleteAsync(id)
+        I->>P: PresentSuccess()
+    end
+    C->>C: return presenter.Result
+```
 
 **Scénarios d'exception :**
 - E1 : tâche introuvable → erreur `NotFound`.
