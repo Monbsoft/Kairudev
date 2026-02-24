@@ -1,0 +1,107 @@
+@page "/tasks"
+@using Kairudev.Web.Services
+@inject TaskApiClient Api
+
+<h2>Tâches du jour</h2>
+
+<div class="mb-3 d-flex gap-2">
+    <input class="form-control"
+           placeholder="Nouvelle tâche…"
+           @bind="newTitle"
+           @bind:event="oninput"
+           @onkeydown="OnKeyDown" />
+    <button class="btn btn-primary" @onclick="AddTask" disabled="@string.IsNullOrWhiteSpace(newTitle)">
+        Ajouter
+    </button>
+</div>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (tasks is null)
+{
+    <p>Chargement…</p>
+}
+else if (tasks.Count == 0)
+{
+    <p class="text-muted">Aucune tâche pour l'instant.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var task in tasks)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="@(task.Status == "Done" ? "text-decoration-line-through text-muted" : "")">
+                    @task.Title
+                </span>
+                <span class="d-flex gap-2 align-items-center">
+                    <span class="badge @StatusBadgeClass(task.Status)">@task.Status</span>
+                    @if (task.Status != "Done")
+                    {
+                        <button class="btn btn-sm btn-success" @onclick="() => CompleteTask(task.Id)">✓</button>
+                    }
+                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteTask(task.Id)">✕</button>
+                </span>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<TaskDto>? tasks;
+    private string newTitle = string.Empty;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync() =>
+        tasks = await Api.GetAllAsync();
+
+    private async Task AddTask()
+    {
+        errorMessage = null;
+        var added = await Api.AddAsync(newTitle.Trim());
+        if (added is not null)
+        {
+            tasks ??= [];
+            tasks.Add(added);
+            newTitle = string.Empty;
+        }
+        else
+        {
+            errorMessage = "Erreur lors de l'ajout de la tâche.";
+        }
+    }
+
+    private async Task CompleteTask(Guid id)
+    {
+        errorMessage = null;
+        if (await Api.CompleteAsync(id))
+            tasks = await Api.GetAllAsync();
+        else
+            errorMessage = "Erreur lors de la complétion.";
+    }
+
+    private async Task DeleteTask(Guid id)
+    {
+        errorMessage = null;
+        if (await Api.DeleteAsync(id))
+            tasks!.RemoveAll(t => t.Id == id);
+        else
+            errorMessage = "Erreur lors de la suppression.";
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(newTitle))
+            await AddTask();
+    }
+
+    private static string StatusBadgeClass(string status) => status switch
+    {
+        "Done" => "bg-success",
+        "InProgress" => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+}

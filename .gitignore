@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# SQLite local database
+kairudev.db
+kairudev.db-shm
+kairudev.db-wal
