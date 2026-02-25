@@ -14,8 +14,8 @@
 | ~~#2b~~ | ~~Réécriture spec.md (use cases + diagrammes Mermaid) + prompts agents~~ | ~~✅ Livré~~ | ~~2026-02-24~~ |
 | ~~#3~~ | ~~BC Pomodoro — sessions de focus, chrono circulaire, lien avec Tasks~~ | ~~✅ Livré~~ | ~~2026-02-25~~ |
 | ~~#3b~~ | ~~.NET Aspire 13.1.1 — AppHost + ServiceDefaults~~ | ~~✅ Livré~~ | ~~2026-02-25~~ |
-| #4 | Tests d'intégration SQLite (`Kairudev.Infrastructure.Tests`) | 📋 Planifié | — |
-| #5 | Configuration externalisée — URL API via `appsettings.json` | 📋 Planifié | — |
+| ~~#4~~ | ~~Tests d'intégration SQLite (`Kairudev.Infrastructure.Tests`)~~ | ~~✅ Livré~~ | ~~2026-02-25~~ |
+| ~~#5~~ | ~~Configuration externalisée — URL API via `appsettings.json`~~ | ~~✅ Livré~~ | ~~2026-02-25~~ |
 | #6 | BC Journal — log d'activité quotidien alimenté par les sprints | 📋 Planifié | — |
 | #7 | BC Tickets — intégration Jira / Linear / GitHub Issues | 📋 Planifié | — |
 | #8 | .NET MAUI — application desktop/mobile | 📋 Planifié | — |
@@ -24,24 +24,24 @@
 
 ## Dernière itération livrée
 
-**#3b — .NET Aspire** — Livré le 2026-02-25
+**#4 + #5 — Tests intégration SQLite + Config externalisée** — Livré le 2026-02-25
 
 ### Ce qui a été livré
-- **`Kairudev.AppHost`** : orchestration `Kairudev.Api` + `Kairudev.Web` via `DistributedApplication`
-- **`Kairudev.ServiceDefaults`** : OpenTelemetry (traces, métriques, logs), health checks `/health` + `/alive`, service discovery, résilience HTTP
-- **`Kairudev.Api`** : `AddServiceDefaults()` + `MapDefaultEndpoints()` ajoutés
-- **`Kairudev.slnx`** : AppHost et ServiceDefaults ajoutés à la solution
-- **ADR-008** : Aspire NuGet-only (pas de workload) — proxy types via `<IsAspireProjectResource>true`
 
-### Démarrage
-```bash
-dotnet run --project src/Kairudev.AppHost
-# Dashboard : http://localhost:18888
-```
+#### #4 — Tests d'intégration SQLite
+- **`InfrastructureTestBase`** : helper SQLite in-memory (`DataSource=:memory:`), schéma créé via `EnsureCreated()`
+- **`SqliteTaskRepositoryTests`** : 6 tests (Add, GetById, GetAll vide, GetAll multiple, Update, Delete)
+- **`SqlitePomodoroSessionRepositoryTests`** : 7 tests (Add, GetById NotFound, GetActive, GetActive None, Update, CompletedTodayCount, LinkedTask)
+- **`SqlitePomodoroSettingsRepositoryTests`** : 3 tests (Defaults, Save, Update)
+- **`Kairudev.Infrastructure.csproj`** : `InternalsVisibleTo` pour Kairudev.Infrastructure.Tests
+- **Total : 72 tests** (35 Domain + 20 Application + 17 Infrastructure), 0 échec
+
+#### #5 — Configuration externalisée URL API
+- **`src/Kairudev.Web/wwwroot/appsettings.json`** : clé `ApiBaseUrl` (valeur dev par défaut)
+- **`src/Kairudev.Web/Program.cs`** : lit `builder.Configuration["ApiBaseUrl"]` (fallback `https://localhost:7056`)
+- L'URL n'est plus hardcodée dans le code source
 
 ### Dette technique héritée et courante
-- URL API hardcodée dans `Program.cs` du Web (`https://localhost:7056`) → itération #5
-- Pas de tests d'intégration SQLite (`Kairudev.Infrastructure.Tests` vide) → itération #4
 - `TaskStatus` : alias `DomainTaskStatus` nécessaire dans les tests (conflit namespace)
 - `DomainErrors` : alias `PomodoroErrors` nécessaire quand Tasks et Pomodoro sont tous deux importés
 - `DeveloperTask.StartProgress()` codé dans le domaine, pas exposé en UC ni en endpoint
@@ -51,7 +51,7 @@ dotnet run --project src/Kairudev.AppHost
 
 ## Stack technique
 - .NET 10 GA (SDK 10.0.200-preview = SDK .NET 10.1 preview, runtime 10 GA)
-- SQLite + EF Core 10 (fichier local `kairudev.db`, hors git)
+- SQLite + EF Core 10.0.3 (fichier local `kairudev.db`, hors git)
 - ASP.NET Core Web API (`Kairudev.Api`)
 - Blazor WebAssembly (`Kairudev.Web`)
 - .NET Aspire 13.1.1 (`Kairudev.AppHost` + `Kairudev.ServiceDefaults`)
@@ -73,11 +73,11 @@ src/
 ├── Kairudev.Api/               ← Tasks/ + Pomodoro/
 ├── Kairudev.AppHost/           ← orchestration Aspire
 ├── Kairudev.ServiceDefaults/   ← OTEL, health checks, service discovery
-└── Kairudev.Web/               ← Services/ + Pages/
+└── Kairudev.Web/               ← Services/ + Pages/ + wwwroot/appsettings.json
 tests/
 ├── Kairudev.Domain.Tests/      ← Tasks/ + Pomodoro/
 ├── Kairudev.Application.Tests/ ← Tasks/ + Pomodoro/
-└── Kairudev.Infrastructure.Tests/  ← vide, à compléter (#4)
+└── Kairudev.Infrastructure.Tests/  ← Tasks/ + Pomodoro/ (17 tests intégration SQLite)
 docs/
 ├── spec.md
 └── project-state.md
