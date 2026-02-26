@@ -17,7 +17,7 @@ public sealed class SqliteTaskRepositoryTests : InfrastructureTestBase
     public async Task Should_PersistTask_When_Added()
     {
         var title = TaskTitle.Create("Test task").Value;
-        var task = DeveloperTask.Create(title, DateTime.UtcNow);
+        var task = DeveloperTask.Create(title, null, DateTime.UtcNow);
 
         await _repository.AddAsync(task);
 
@@ -39,8 +39,8 @@ public sealed class SqliteTaskRepositoryTests : InfrastructureTestBase
     [Fact]
     public async Task Should_ReturnAllTasks_When_MultipleAdded()
     {
-        var t1 = DeveloperTask.Create(TaskTitle.Create("First").Value, DateTime.UtcNow);
-        var t2 = DeveloperTask.Create(TaskTitle.Create("Second").Value, DateTime.UtcNow.AddSeconds(1));
+        var t1 = DeveloperTask.Create(TaskTitle.Create("First").Value, null, DateTime.UtcNow);
+        var t2 = DeveloperTask.Create(TaskTitle.Create("Second").Value, null, DateTime.UtcNow.AddSeconds(1));
 
         await _repository.AddAsync(t1);
         await _repository.AddAsync(t2);
@@ -62,7 +62,7 @@ public sealed class SqliteTaskRepositoryTests : InfrastructureTestBase
     [Fact]
     public async Task Should_PersistStatusChange_When_TaskUpdated()
     {
-        var task = DeveloperTask.Create(TaskTitle.Create("Updatable task").Value, DateTime.UtcNow);
+        var task = DeveloperTask.Create(TaskTitle.Create("Updatable task").Value, null, DateTime.UtcNow);
         await _repository.AddAsync(task);
 
         task.Complete();
@@ -77,7 +77,7 @@ public sealed class SqliteTaskRepositoryTests : InfrastructureTestBase
     [Fact]
     public async Task Should_RemoveTask_When_Deleted()
     {
-        var task = DeveloperTask.Create(TaskTitle.Create("To delete").Value, DateTime.UtcNow);
+        var task = DeveloperTask.Create(TaskTitle.Create("To delete").Value, null, DateTime.UtcNow);
         await _repository.AddAsync(task);
 
         await _repository.DeleteAsync(task.Id);

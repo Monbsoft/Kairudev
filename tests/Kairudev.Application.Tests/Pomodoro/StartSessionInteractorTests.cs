@@ -1,3 +1,4 @@
+using Kairudev.Application.Journal.CreateJournalEntry;
 using Kairudev.Application.Pomodoro.Common;
 using Kairudev.Application.Pomodoro.StartSession;
 
@@ -8,10 +9,11 @@ public sealed class StartSessionInteractorTests
     private readonly FakePomodoroSessionRepository _sessions = new();
     private readonly FakePomodoroSettingsRepository _settings = new();
     private readonly FakePresenter _presenter = new();
+    private readonly NoOpCreateJournalEntryUseCase _noOpJournal = new();
     private readonly StartSessionInteractor _sut;
 
     public StartSessionInteractorTests() =>
-        _sut = new StartSessionInteractor(_sessions, _settings, _presenter);
+        _sut = new StartSessionInteractor(_sessions, _settings, _presenter, _noOpJournal);
 
     [Fact]
     public async Task Should_PresentSuccess_When_NoActiveSession()
@@ -47,11 +49,17 @@ public sealed class StartSessionInteractorTests
         await _sut.Execute(new StartSessionRequest());
         var secondPresenter = new FakePresenter();
 
-        await new StartSessionInteractor(_sessions, _settings, secondPresenter)
+        await new StartSessionInteractor(_sessions, _settings, secondPresenter, _noOpJournal)
             .Execute(new StartSessionRequest());
 
         Assert.False(secondPresenter.IsSuccess);
         Assert.NotNull(secondPresenter.FailureReason);
+    }
+
+    private sealed class NoOpCreateJournalEntryUseCase : ICreateJournalEntryUseCase
+    {
+        public Task Execute(CreateJournalEntryRequest request, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
     }
 
     private sealed class FakePresenter : IStartSessionPresenter

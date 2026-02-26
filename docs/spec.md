@@ -27,6 +27,7 @@ flowchart LR
             UC2(["Lister les tâches"])
             UC3(["Compléter une tâche"])
             UC4(["Supprimer une tâche"])
+            UC5(["Modifier une tâche"])
             UC12(["Changer le statut"])
         end
 
@@ -57,6 +58,7 @@ flowchart LR
     Dev --> UC2
     Dev --> UC3
     Dev --> UC4
+    Dev --> UC5
     Dev --> UC12
     Dev --> P05
     Dev --> P06
@@ -68,6 +70,10 @@ flowchart LR
     Dev --> UC13
     Dev --> UC14
     Dev --> UC15
+    Dev --> UC16
+    Système --> UCS1
+    Dev --> UC9
+```
     Dev --> UC16
     Système --> UCS1
     Dev --> UC9
@@ -119,13 +125,15 @@ classDiagram
     class DeveloperTask {
         +TaskId Id
         +TaskTitle Title
+        +TaskDescription? Description
         +TaskStatus Status
         +DateTime CreatedAt
         +DateTime? CompletedAt
-        +Create(title, createdAt) DeveloperTask
+        +Create(title, description, createdAt) DeveloperTask
         +Complete() Result
         +StartProgress() Result
         +ChangeStatus(newStatus, now) Result
+        +UpdateDetails(title, description) void
     }
 
     class TaskId {
@@ -138,6 +146,12 @@ classDiagram
         +string Value
         +MaxLength = 200
         +Create(value) Result~TaskTitle~
+    }
+
+    class TaskDescription {
+        +string Value
+        +MaxLength = 1000
+        +Create(value) Result~TaskDescription?~
     }
 
     class TaskStatus {
@@ -158,6 +172,7 @@ classDiagram
 
     DeveloperTask --> TaskId : identifié par
     DeveloperTask --> TaskTitle : possède
+    DeveloperTask --> TaskDescription : possède (optionnel)
     DeveloperTask --> TaskStatus : a le statut
     ITaskRepository ..> DeveloperTask : gère
 ```
@@ -407,6 +422,70 @@ sequenceDiagram
 - [x] Tâche inexistante → `404 Not Found`
 - [x] Valeur de statut non reconnue → `400 Bad Request`
 - [x] Persistée et reflétée dans `ListTasks`
+
+---
+
+### UC-05 — Modifier une tâche
+
+**Acteur principal :** Développeur  
+**Parties prenantes :** —  
+**Préconditions :** la tâche identifiée existe.  
+**Postconditions (succès) :** le titre et/ou la description sont mis à jour, modification persistée.
+
+**Scénario nominal :**
+1. Le développeur désigne une tâche (par id) et fournit un nouveau titre et/ou une nouvelle description.
+2. Le système vérifie que la tâche existe.
+3. Le système valide le titre (non vide, ≤ 200 caractères).
+4. Le système valide la description (≤ 1000 caractères, optionnelle).
+5. Le système met à jour le titre et la description de la tâche.
+6. Le système persiste la modification et retourne la tâche mise à jour.
+
+**Scénarios d'exception :**
+- E1 : tâche introuvable → `404 Not Found`.
+- E2 : titre vide → `400 Bad Request` (erreur de validation).
+- E3 : titre > 200 caractères → `400 Bad Request` (erreur de validation).
+- E4 : description > 1000 caractères → `400 Bad Request` (erreur de validation).
+
+```mermaid
+sequenceDiagram
+    participant C as TasksController
+    participant P as UpdateTaskHttpPresenter
+    participant I as UpdateTaskInteractor
+    participant R as ITaskRepository
+    participant T as DeveloperTask
+
+    C->>I: Execute(UpdateTaskRequest(id, title, description))
+    I->>R: GetByIdAsync(id)
+    alt tâche introuvable
+        R-->>I: null
+        I->>P: PresentNotFound()
+    else tâche trouvée
+        R-->>I: task
+        I->>I: TaskTitle.Create(title)
+        alt titre invalide
+            I->>P: PresentValidationError(error)
+        else titre valide
+            I->>I: TaskDescription.Create(description)
+            alt description invalide
+                I->>P: PresentValidationError(error)
+            else description valide
+                I->>T: UpdateDetails(title, description)
+                I->>R: UpdateAsync(task)
+                I->>P: PresentSuccess(TaskViewModel)
+            end
+        end
+    end
+    C->>C: return presenter.Result
+```
+
+**Critères d'acceptance :**
+- [x] Le titre peut être modifié
+- [x] La description peut être ajoutée, modifiée ou supprimée (null)
+- [x] Titre vide → `400 Bad Request`
+- [x] Titre > 200 caractères → `400 Bad Request`
+- [x] Description > 1000 caractères → `400 Bad Request`
+- [x] Tâche inexistante → `404 Not Found`
+- [x] Modification persistée et reflétée dans `ListTasks`
 
 ---
 

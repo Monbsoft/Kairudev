@@ -6,7 +6,7 @@ namespace Kairudev.Domain.Tests.Tasks;
 public sealed class DeveloperTaskTests
 {
     private static DeveloperTask CreateValidTask(string title = "Write unit tests") =>
-        DeveloperTask.Create(TaskTitle.Create(title).Value, DateTime.UtcNow);
+        DeveloperTask.Create(TaskTitle.Create(title).Value, null, DateTime.UtcNow);
 
     [Fact]
     public void Should_BeInPendingStatus_When_Created()

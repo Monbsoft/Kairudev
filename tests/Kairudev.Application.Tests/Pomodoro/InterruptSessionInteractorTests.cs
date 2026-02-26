@@ -1,3 +1,4 @@
+using Kairudev.Application.Journal.CreateJournalEntry;
 using Kairudev.Application.Pomodoro.InterruptSession;
 using Kairudev.Domain.Pomodoro;
 
@@ -7,10 +8,11 @@ public sealed class InterruptSessionInteractorTests
 {
     private readonly FakePomodoroSessionRepository _sessions = new();
     private readonly FakePresenter _presenter = new();
+    private readonly NoOpCreateJournalEntryUseCase _noOpJournal = new();
     private readonly InterruptSessionInteractor _sut;
 
     public InterruptSessionInteractorTests() =>
-        _sut = new InterruptSessionInteractor(_sessions, _presenter);
+        _sut = new InterruptSessionInteractor(_sessions, _presenter, _noOpJournal);
 
     private void AddActiveSession()
     {
@@ -36,6 +38,12 @@ public sealed class InterruptSessionInteractorTests
 
         Assert.False(_presenter.IsSuccess);
         Assert.NotNull(_presenter.FailureReason);
+    }
+
+    private sealed class NoOpCreateJournalEntryUseCase : ICreateJournalEntryUseCase
+    {
+        public Task Execute(CreateJournalEntryRequest request, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
     }
 
     private sealed class FakePresenter : IInterruptSessionPresenter

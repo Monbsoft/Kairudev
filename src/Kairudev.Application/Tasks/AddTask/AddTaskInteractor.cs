@@ -23,7 +23,14 @@ public sealed class AddTaskInteractor : IAddTaskUseCase
             return;
         }
 
-        var task = DeveloperTask.Create(titleResult.Value, DateTime.UtcNow);
+        var descriptionResult = TaskDescription.Create(request.Description);
+        if (descriptionResult.IsFailure)
+        {
+            _presenter.PresentValidationError(descriptionResult.Error);
+            return;
+        }
+
+        var task = DeveloperTask.Create(titleResult.Value, descriptionResult.Value, DateTime.UtcNow);
         await _repository.AddAsync(task, cancellationToken);
         _presenter.PresentSuccess(TaskViewModel.From(task));
     }

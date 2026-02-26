@@ -34,7 +34,7 @@ public sealed class DeleteTaskInteractorTests
 
     private DeveloperTask CreateAndAddTask()
     {
-        var task = DeveloperTask.Create(TaskTitle.Create("Task to delete").Value, DateTime.UtcNow);
+        var task = DeveloperTask.Create(TaskTitle.Create("Task to delete").Value, null, DateTime.UtcNow);
         _repository.Tasks.Add(task);
         return task;
     }

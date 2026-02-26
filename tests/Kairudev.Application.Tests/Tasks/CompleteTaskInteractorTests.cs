@@ -1,3 +1,4 @@
+using Kairudev.Application.Journal.CreateJournalEntry;
 using Kairudev.Application.Tasks.CompleteTask;
 using Kairudev.Domain.Tasks;
 using DomainTaskStatus = Kairudev.Domain.Tasks.TaskStatus;
@@ -8,10 +9,11 @@ public sealed class CompleteTaskInteractorTests
 {
     private readonly FakeTaskRepository _repository = new();
     private readonly FakeCompleteTaskPresenter _presenter = new();
+    private readonly NoOpCreateJournalEntryUseCase _noOpJournal = new();
     private readonly CompleteTaskInteractor _sut;
 
     public CompleteTaskInteractorTests() =>
-        _sut = new CompleteTaskInteractor(_repository, _presenter);
+        _sut = new CompleteTaskInteractor(_repository, _presenter, _noOpJournal);
 
     [Fact]
     public async Task Should_PresentSuccess_When_TaskExistsAndIsPending()
@@ -47,9 +49,15 @@ public sealed class CompleteTaskInteractorTests
 
     private DeveloperTask CreateAndAddTask()
     {
-        var task = DeveloperTask.Create(TaskTitle.Create("Task to complete").Value, DateTime.UtcNow);
+        var task = DeveloperTask.Create(TaskTitle.Create("Task to complete").Value, null, DateTime.UtcNow);
         _repository.Tasks.Add(task);
         return task;
+    }
+
+    private sealed class NoOpCreateJournalEntryUseCase : ICreateJournalEntryUseCase
+    {
+        public Task Execute(CreateJournalEntryRequest request, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
     }
 
     private sealed class FakeCompleteTaskPresenter : ICompleteTaskPresenter

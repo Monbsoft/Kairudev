@@ -4,21 +4,23 @@ namespace Kairudev.Domain.Tasks;
 
 public sealed class DeveloperTask : AggregateRoot<TaskId>
 {
-    private DeveloperTask(TaskId id, TaskTitle title, DateTime createdAt)
+    private DeveloperTask(TaskId id, TaskTitle title, TaskDescription? description, DateTime createdAt)
         : base(id)
     {
         Title = title;
+        Description = description;
         Status = TaskStatus.Pending;
         CreatedAt = createdAt;
     }
 
     public TaskTitle Title { get; private set; }
+    public TaskDescription? Description { get; private set; }
     public TaskStatus Status { get; private set; }
     public DateTime CreatedAt { get; }
     public DateTime? CompletedAt { get; private set; }
 
-    public static DeveloperTask Create(TaskTitle title, DateTime createdAt) =>
-        new(TaskId.New(), title, createdAt);
+    public static DeveloperTask Create(TaskTitle title, TaskDescription? description, DateTime createdAt) =>
+        new(TaskId.New(), title, description, createdAt);
 
     public Result Complete()
     {
@@ -51,5 +53,11 @@ public sealed class DeveloperTask : AggregateRoot<TaskId>
 
         Status = newStatus;
         return Result.Success();
+    }
+
+    public void UpdateDetails(TaskTitle title, TaskDescription? description)
+    {
+        Title = title;
+        Description = description;
     }
 }

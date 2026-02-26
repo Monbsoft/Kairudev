@@ -5,6 +5,7 @@ using Kairudev.Application.Tasks.ChangeTaskStatus;
 using Kairudev.Application.Tasks.CompleteTask;
 using Kairudev.Application.Tasks.DeleteTask;
 using Kairudev.Application.Tasks.ListTasks;
+using Kairudev.Application.Tasks.UpdateTask;
 using Kairudev.Domain.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -72,6 +73,20 @@ public sealed class TasksController : ControllerBase
             .Execute(new ChangeTaskStatusRequest(id, body.NewStatus), cancellationToken);
         return presenter.Result!;
     }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(
+        Guid id,
+        [FromBody] UpdateTaskBody body,
+        CancellationToken cancellationToken)
+    {
+        var presenter = new UpdateTaskHttpPresenter();
+        await new UpdateTaskInteractor(_repository, presenter)
+            .Execute(new UpdateTaskRequest(id, body.Title, body.Description), cancellationToken);
+        return presenter.Result!;
+    }
 }
 
 public sealed record ChangeTaskStatusBody(string NewStatus);
+
+public sealed record UpdateTaskBody(string Title, string? Description);

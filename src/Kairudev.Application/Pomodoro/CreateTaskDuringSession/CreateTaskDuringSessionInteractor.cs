@@ -37,7 +37,7 @@ public sealed class CreateTaskDuringSessionInteractor : ICreateTaskDuringSession
             return;
         }
 
-        var task = DeveloperTask.Create(titleResult.Value, DateTime.UtcNow);
+        var task = DeveloperTask.Create(titleResult.Value, null, DateTime.UtcNow);
         await _taskRepository.AddAsync(task, cancellationToken);
 
         session.LinkTask(task.Id);

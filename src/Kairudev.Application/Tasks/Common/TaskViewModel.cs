@@ -5,6 +5,7 @@ namespace Kairudev.Application.Tasks.Common;
 public sealed record TaskViewModel(
     Guid Id,
     string Title,
+    string? Description,
     string Status,
     DateTime CreatedAt,
     DateTime? CompletedAt)
@@ -13,6 +14,7 @@ public sealed record TaskViewModel(
         new(
             task.Id.Value,
             task.Title.Value,
+            task.Description?.Value,
             task.Status.ToString(),
             task.CreatedAt,
             task.CompletedAt);

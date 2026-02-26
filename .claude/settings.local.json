@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet add:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet tool list:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(dotnet workload:*)",
+      "Bash(dotnet:*)",
+      "Bash(Select-String -Pattern \"error|réussi|échoué\")",
+      "Bash(taskkill /PID 33816 /F)",
+      "Bash(cmd.exe /C \"taskkill /PID 33816 /F\")",
+      "Bash(cmd.exe /C \"taskkill /IM Kairudev.Api.exe /F 2>&1\")"
+    ]
+  }
+}

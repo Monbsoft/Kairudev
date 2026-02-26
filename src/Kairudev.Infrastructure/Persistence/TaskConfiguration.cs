@@ -25,6 +25,12 @@ internal sealed class TaskConfiguration : IEntityTypeConfiguration<DeveloperTask
             .HasMaxLength(TaskTitle.MaxLength)
             .IsRequired();
 
+        builder.Property(t => t.Description)
+            .HasConversion(
+                desc => desc != null ? desc.Value : null,
+                value => TaskDescription.Create(value).Value)
+            .HasMaxLength(TaskDescription.MaxLength);
+
         builder.Property(t => t.Status)
             .HasConversion<string>()
             .IsRequired();
