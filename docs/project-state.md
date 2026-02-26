@@ -7,21 +7,23 @@
 
 ## Résumé état actuel
 
-**Dernière itération : #6 — UC-05 (Pomodoro) Configurer les durées** (2026-02-26)
+**Dernière itération : #7 — Types de session Pomodoro (Sprint/Pause courte/Pause longue)** (2026-02-26)
 
 **Bounded Contexts opérationnels :**
 - **Tasks** : 6 use cases (Add, List, Complete, Delete, Update, ChangeStatus) — **UI complète** ✅
-- **Pomodoro** : 8 use cases — **UC-05 SaveSettings implémenté** ✅
-  - Démarrer/Terminer/Interrompre sprint
-  - Lier tâche, Créer tâche, Mettre à jour statut
+- **Pomodoro** : 9 use cases — **Types de session implémentés** ✅
   - **Configurer les durées (sprint, pause courte, pause longue)** ✅
+  - Démarrer sprint/pause avec **sélection du type** ✅
+  - Terminer/Interrompre sprint
+  - Lier tâche, Créer tâche, Mettre à jour statut
+  - **Suggestion intelligente du prochain type** ✅
 - **Journal** : 5 use cases (consultation, ajout/modification/suppression commentaires)
 
 **Tests :** 154 au total (71 Domain + 66 Application + 17 Infrastructure), tous au vert ✅
 
 **Infrastructure :** API REST, Blazor WASM, SQLite + EF Core, .NET Aspire orchestration
 
-**Migrations :** 4 migrations (InitialCreate, AddPomodoro, AddJournalEntry, AddTaskDescription)
+**Migrations :** 5 migrations (InitialCreate, AddPomodoro, AddJournalEntry, AddTaskDescription, AddSessionType)
 
 ---
 
@@ -41,13 +43,73 @@
 | ~~#5d~~ | ~~Correctif migration EF Core — AddTaskDescription~~ | ~~✅ Livré~~ | ~~2026-02-26~~ |
 | ~~#5e~~ | ~~UI Blazor — Description et modification de tâches~~ | ~~✅ Livré~~ | ~~2026-02-26~~ |
 | ~~#6~~ | ~~UC-05 (Pomodoro) — Configurer les durées (sprint, pause courte/longue)~~ | ~~✅ Livré~~ | ~~2026-02-26~~ |
-| #7 | BC Journal — log d'activité quotidien alimenté par les sprints | 📋 Planifié | — |
-| #8 | BC Tickets — intégration Jira / Linear / GitHub Issues | 📋 Planifié | — |
-| #9 | .NET MAUI — application desktop/mobile | 📋 Planifié | — |
+| ~~#7~~ | ~~Types de session Pomodoro (Sprint/Pause courte/Pause longue) — UI onglets~~ | ~~✅ Livré~~ | ~~2026-02-26~~ |
+| #8 | BC Journal — log d'activité quotidien alimenté par les sprints | 📋 Planifié | — |
+| #9 | BC Tickets — intégration Jira / Linear / GitHub Issues | 📋 Planifié | — |
+| #10 | .NET MAUI — application desktop/mobile | 📋 Planifié | — |
 
 ---
 
 ## Dernière itération livrée
+
+**#7 — Types de session Pomodoro (Sprint/Pause courte/Pause longue)** — Livré le 2026-02-26
+
+### Ce qui a été livré
+
+#### Problème
+L'utilisateur ne pouvait pas choisir le type de session Pomodoro à démarrer. Seul le sprint était disponible, sans possibilité de lancer explicitement une pause courte ou longue. Le système comptait les sprints mais ne suggérait pas automatiquement le type de session suivant.
+
+#### Solution appliquée
+
+**Backend (Partie 1/2)**
+
+- **Domain** : Nouveau enum `PomodoroSessionType` (Sprint, ShortBreak, LongBreak)
+- **Domain** : Propriété `SessionType` ajoutée à `PomodoroSession`
+- **Application** : 
+  - `StartSessionRequest` accepte un paramètre `sessionType` optionnel
+  - Logique de suggestion intelligente : après 4 sprints → LongBreak, sinon → Sprint/ShortBreak
+  - Nouveau use case `GetSuggestedSessionType` pour récupérer la suggestion
+- **API** : 
+  - `GET /api/pomodoro/session/suggested` — retourne le type suggéré + durées
+  - `POST /api/pomodoro/session?type={Sprint|ShortBreak|LongBreak}` — démarre avec type spécifique
+- **Infrastructure** : Migration `AddSessionType` (colonne `SessionType` dans table PomodoroSessions)
+- **Tests** : Tous les tests mis à jour pour `PomodoroSession.Create(type, duration)`
+
+**Frontend (Partie 2/2)**
+
+- **DTO** : 
+  - `PomodoroSessionDto` inclut maintenant `SessionType`
+  - Nouveau `SuggestedSessionTypeDto` pour la suggestion
+- **ApiClient** : 
+  - `GetSuggestedSessionTypeAsync()` — appel à l'endpoint de suggestion
+  - `StartSessionAsync(sessionType)` — démarre avec type optionnel
+- **UI Blazor** : 
+  - **3 onglets (radio buttons)** pour choisir le type :
+    - 🍅 **Sprint** (bleu, durée configurée)
+    - ☕ **Pause courte** (vert, durée configurée)
+    - 🌙 **Pause longue** (cyan, durée configurée)
+  - **Présélection intelligente** via `GET /suggested` au chargement
+  - **Durée affichée dynamiquement** dans chaque onglet
+  - **Couleur de l'arc** adaptée au type de session
+  - **Label de statut** contextualisé ("Sprint en cours", "Pause courte", "Pause longue")
+
+**Tests** : 154 tests au total (71 Domain + 66 Application + 17 Infrastructure), 0 échec ✅
+
+### Impact
+- L'utilisateur peut maintenant **choisir explicitement** le type de session à démarrer
+- Le système **suggère intelligemment** le prochain type basé sur l'historique
+- **Meilleure expérience utilisateur** : onglets visuels + durées claires
+- **Traçabilité complète** : chaque session stocke son type en base
+- **Respect du rythme Pomodoro classique** : 4 sprints → pause longue
+
+### Captures d'écran (UI)
+- Page `/pomodoro` : 3 onglets avec durées affichées
+- Horloge circulaire : couleur adaptée (bleu/vert/cyan)
+- Label dynamique : "Sprint en cours" / "Pause courte" / "Pause longue"
+
+---
+
+## Itération #6 (précédente)
 
 **#6 — UC-05 (Pomodoro) — Configurer les durées** — Livré le 2026-02-26
 
