@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,10 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.1.1" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Kairudev.Api/Kairudev.Api.csproj">
