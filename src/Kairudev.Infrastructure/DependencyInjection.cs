@@ -1,6 +1,8 @@
+using Kairudev.Domain.Journal;
 using Kairudev.Domain.Pomodoro;
 using Kairudev.Domain.Tasks;
 using Kairudev.Infrastructure.Persistence;
+using Kairudev.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<ITaskRepository, SqliteTaskRepository>();
         services.AddScoped<IPomodoroSessionRepository, SqlitePomodoroSessionRepository>();
         services.AddScoped<IPomodoroSettingsRepository, SqlitePomodoroSettingsRepository>();
+        services.AddScoped<IJournalEntryRepository, SqliteJournalEntryRepository>();
 
         return services;
     }

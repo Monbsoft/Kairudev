@@ -1,4 +1,5 @@
 using Kairudev.Api.Pomodoro.Presenters;
+using Kairudev.Application.Journal.CreateJournalEntry;
 using Kairudev.Application.Pomodoro.CompleteSession;
 using Kairudev.Application.Pomodoro.CreateTaskDuringSession;
 using Kairudev.Application.Pomodoro.GetCurrentSession;
@@ -21,15 +22,18 @@ public sealed class PomodoroController : ControllerBase
     private readonly IPomodoroSessionRepository _sessionRepository;
     private readonly IPomodoroSettingsRepository _settingsRepository;
     private readonly ITaskRepository _taskRepository;
+    private readonly ICreateJournalEntryUseCase _journalUseCase;
 
     public PomodoroController(
         IPomodoroSessionRepository sessionRepository,
         IPomodoroSettingsRepository settingsRepository,
-        ITaskRepository taskRepository)
+        ITaskRepository taskRepository,
+        ICreateJournalEntryUseCase journalUseCase)
     {
         _sessionRepository = sessionRepository;
         _settingsRepository = settingsRepository;
         _taskRepository = taskRepository;
+        _journalUseCase = journalUseCase;
     }
 
     // ── Settings ───────────────────────────────────────────────────────────
@@ -69,7 +73,7 @@ public sealed class PomodoroController : ControllerBase
     public async Task<IActionResult> StartSession(CancellationToken cancellationToken)
     {
         var presenter = new StartSessionHttpPresenter();
-        await new StartSessionInteractor(_sessionRepository, _settingsRepository, presenter)
+        await new StartSessionInteractor(_sessionRepository, _settingsRepository, presenter, _journalUseCase)
             .Execute(new StartSessionRequest(), cancellationToken);
         return presenter.Result!;
     }
@@ -78,7 +82,7 @@ public sealed class PomodoroController : ControllerBase
     public async Task<IActionResult> CompleteSession(CancellationToken cancellationToken)
     {
         var presenter = new CompleteSessionHttpPresenter();
-        await new CompleteSessionInteractor(_sessionRepository, _settingsRepository, presenter)
+        await new CompleteSessionInteractor(_sessionRepository, _settingsRepository, presenter, _journalUseCase)
             .Execute(new CompleteSessionRequest(), cancellationToken);
         return presenter.Result!;
     }
@@ -87,7 +91,7 @@ public sealed class PomodoroController : ControllerBase
     public async Task<IActionResult> InterruptSession(CancellationToken cancellationToken)
     {
         var presenter = new InterruptSessionHttpPresenter();
-        await new InterruptSessionInteractor(_sessionRepository, presenter)
+        await new InterruptSessionInteractor(_sessionRepository, presenter, _journalUseCase)
             .Execute(new InterruptSessionRequest(), cancellationToken);
         return presenter.Result!;
     }

@@ -38,4 +38,18 @@ public sealed class DeveloperTask : AggregateRoot<TaskId>
         Status = TaskStatus.InProgress;
         return Result.Success();
     }
+
+    public Result ChangeStatus(TaskStatus newStatus, DateTime now)
+    {
+        if (Status == newStatus)
+            return Result.Failure(DomainErrors.Tasks.SameStatus);
+
+        if (newStatus == TaskStatus.Done)
+            CompletedAt = now;
+        else if (Status == TaskStatus.Done)
+            CompletedAt = null;
+
+        Status = newStatus;
+        return Result.Success();
+    }
 }

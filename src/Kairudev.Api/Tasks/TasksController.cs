@@ -1,5 +1,7 @@
 using Kairudev.Api.Tasks.Presenters;
+using Kairudev.Application.Journal.CreateJournalEntry;
 using Kairudev.Application.Tasks.AddTask;
+using Kairudev.Application.Tasks.ChangeTaskStatus;
 using Kairudev.Application.Tasks.CompleteTask;
 using Kairudev.Application.Tasks.DeleteTask;
 using Kairudev.Application.Tasks.ListTasks;
@@ -13,8 +15,13 @@ namespace Kairudev.Api.Tasks;
 public sealed class TasksController : ControllerBase
 {
     private readonly ITaskRepository _repository;
+    private readonly ICreateJournalEntryUseCase _journalUseCase;
 
-    public TasksController(ITaskRepository repository) => _repository = repository;
+    public TasksController(ITaskRepository repository, ICreateJournalEntryUseCase journalUseCase)
+    {
+        _repository = repository;
+        _journalUseCase = journalUseCase;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
@@ -40,7 +47,7 @@ public sealed class TasksController : ControllerBase
     public async Task<IActionResult> Complete(Guid id, CancellationToken cancellationToken)
     {
         var presenter = new CompleteTaskHttpPresenter();
-        await new CompleteTaskInteractor(_repository, presenter)
+        await new CompleteTaskInteractor(_repository, presenter, _journalUseCase)
             .Execute(new CompleteTaskRequest(id), cancellationToken);
         return presenter.Result!;
     }
@@ -53,4 +60,18 @@ public sealed class TasksController : ControllerBase
             .Execute(new DeleteTaskRequest(id), cancellationToken);
         return presenter.Result!;
     }
+
+    [HttpPatch("{id:guid}/status")]
+    public async Task<IActionResult> ChangeStatus(
+        Guid id,
+        [FromBody] ChangeTaskStatusBody body,
+        CancellationToken cancellationToken)
+    {
+        var presenter = new ChangeTaskStatusHttpPresenter();
+        await new ChangeTaskStatusInteractor(_repository, presenter, _journalUseCase)
+            .Execute(new ChangeTaskStatusRequest(id, body.NewStatus), cancellationToken);
+        return presenter.Result!;
+    }
 }
+
+public sealed record ChangeTaskStatusBody(string NewStatus);
