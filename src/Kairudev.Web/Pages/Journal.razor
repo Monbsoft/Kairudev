@@ -111,12 +111,55 @@
 </div>
 
 <style>
+    /* ── Variables — light (défaut) ──────────────────────── */
     .notebook {
+        --nb-body-bg:            #fafaf7;
+        --nb-body-border:        #e4e0d8;
+        --nb-dot-default-bg:     #fafaf7;
+        --nb-dot-default-border: #c8c4bc;
+        --nb-line-color:         #e8e4da;
+        --nb-time-color:         #a09ea8;
+        --nb-label-color:        #2c2c3a;
+        --nb-tasks-label-color:  #9896a8;
+        --nb-tasks-item-color:   #3a3848;
+        --nb-comment-bg:         #f0ede6;
+        --nb-comment-border:     #d4c89a;
+        --nb-comment-text-color: #3c3a4a;
+        --nb-add-btn-border:     #ccc8be;
+        --nb-add-btn-color:      #b0aeba;
+        --nb-btn-icon-color:     #888888;
+        --nb-sprint-dot-bg:      #e8f0fe;
+        --nb-break-dot-bg:       #e8f5ee;
+        --nb-task-dot-bg:        #f0ebfa;
+        --nb-warn-dot-bg:        #fff3e8;
         max-width: 700px;
         margin: 0 auto;
     }
 
-    /* ── En-tête ─────────────────────────────────────────── */
+    /* ── Variables — dark ────────────────────────────────── */
+    [data-bs-theme="dark"] .notebook {
+        --nb-body-bg:            #13131f;
+        --nb-body-border:        #252538;
+        --nb-dot-default-bg:     #13131f;
+        --nb-dot-default-border: #3a3a5c;
+        --nb-line-color:         #252538;
+        --nb-time-color:         #6272a4;
+        --nb-label-color:        #ccd6f6;
+        --nb-tasks-label-color:  #6272a4;
+        --nb-tasks-item-color:   #8892b0;
+        --nb-comment-bg:         #1c1c2e;
+        --nb-comment-border:     #3a3a5c;
+        --nb-comment-text-color: #8892b0;
+        --nb-add-btn-border:     #3a3a5c;
+        --nb-add-btn-color:      #6272a4;
+        --nb-btn-icon-color:     #6272a4;
+        --nb-sprint-dot-bg:      #0d1b3e;
+        --nb-break-dot-bg:       #0d2818;
+        --nb-task-dot-bg:        #1e0d3e;
+        --nb-warn-dot-bg:        #3e1e0d;
+    }
+
+    /* ── En-tête (déjà sombre, invariant) ───────────────── */
     .notebook-header {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         border-radius: 8px 8px 0 0;
@@ -156,8 +199,8 @@
 
     /* ── Corps ───────────────────────────────────────────── */
     .notebook-body {
-        background: #fafaf7;
-        border: 1px solid #e4e0d8;
+        background: var(--nb-body-bg);
+        border: 1px solid var(--nb-body-border);
         border-top: none;
         border-radius: 0 0 8px 8px;
         min-height: 120px;
@@ -190,7 +233,7 @@
     .nb-time {
         font-size: 0.72rem;
         font-weight: 700;
-        color: #a09ea8;
+        color: var(--nb-time-color);
         font-variant-numeric: tabular-nums;
         text-align: right;
         padding-top: 2px;
@@ -208,8 +251,8 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        border: 2px solid #c8c4bc;
-        background: #fafaf7;
+        border: 2px solid var(--nb-dot-default-border);
+        background: var(--nb-dot-default-bg);
         flex-shrink: 0;
         margin-top: 4px;
     }
@@ -217,7 +260,7 @@
     .nb-line {
         width: 2px;
         flex-grow: 1;
-        background: #e8e4da;
+        background: var(--nb-line-color);
         margin-top: 3px;
         min-height: 16px;
     }
@@ -227,10 +270,10 @@
     }
 
     /* Variantes de couleur des dots */
-    .nb-sprint .nb-dot { border-color: #0d6efd; background: #e8f0fe; }
-    .nb-break  .nb-dot { border-color: #198754; background: #e8f5ee; }
-    .nb-task   .nb-dot { border-color: #6f42c1; background: #f0ebfa; }
-    .nb-warn   .nb-dot { border-color: #fd7e14; background: #fff3e8; }
+    .nb-sprint .nb-dot { border-color: #0d6efd; background: var(--nb-sprint-dot-bg); }
+    .nb-break  .nb-dot { border-color: #198754; background: var(--nb-break-dot-bg);  }
+    .nb-task   .nb-dot { border-color: #6f42c1; background: var(--nb-task-dot-bg);   }
+    .nb-warn   .nb-dot { border-color: #fd7e14; background: var(--nb-warn-dot-bg);   }
 
     /* ── Contenu d'une entrée ────────────────────────────── */
     .nb-content {
@@ -252,7 +295,7 @@
     .nb-label {
         font-size: 0.88rem;
         font-weight: 700;
-        color: #2c2c3a;
+        color: var(--nb-label-color);
     }
 
     /* ── Tâches travaillées ──────────────────────────────── */
@@ -264,7 +307,7 @@
         font-size: 0.68rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #9896a8;
+        color: var(--nb-tasks-label-color);
         font-weight: 700;
     }
 
@@ -276,7 +319,7 @@
 
     .nb-tasks-list li {
         font-size: 0.83rem;
-        color: #3a3848;
+        color: var(--nb-tasks-item-color);
         padding: 0.1rem 0;
         display: flex;
         align-items: center;
@@ -300,8 +343,8 @@
         align-items: flex-start;
         justify-content: space-between;
         gap: 0.5rem;
-        background: #f0ede6;
-        border-left: 3px solid #d4c89a;
+        background: var(--nb-comment-bg);
+        border-left: 3px solid var(--nb-comment-border);
         padding: 0.3rem 0.5rem;
         border-radius: 0 4px 4px 0;
         font-size: 0.82rem;
@@ -309,7 +352,7 @@
 
     .nb-comment-text {
         flex-grow: 1;
-        color: #3c3a4a;
+        color: var(--nb-comment-text-color);
     }
 
     .nb-comment-actions {
@@ -330,7 +373,7 @@
         padding: 0 0.2rem;
         font-size: 0.78rem;
         cursor: pointer;
-        color: #888;
+        color: var(--nb-btn-icon-color);
         line-height: 1;
     }
 
@@ -340,11 +383,11 @@
     /* ── Bouton + note ───────────────────────────────────── */
     .nb-add-btn {
         background: none;
-        border: 1px dashed #ccc8be;
+        border: 1px dashed var(--nb-add-btn-border);
         border-radius: 4px;
         padding: 0.12rem 0.5rem;
         font-size: 0.72rem;
-        color: #b0aeba;
+        color: var(--nb-add-btn-color);
         cursor: pointer;
         margin-left: 1.4rem;
         margin-top: 0.25rem;
@@ -355,7 +398,7 @@
     .nb-add-btn:hover {
         border-color: #0d6efd;
         color: #0d6efd;
-        background: #f0f4ff;
+        background: var(--nb-sprint-dot-bg);
     }
 </style>
 
