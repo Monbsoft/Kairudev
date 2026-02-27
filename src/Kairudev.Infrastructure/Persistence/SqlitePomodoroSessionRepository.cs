@@ -21,6 +21,14 @@ internal sealed class SqlitePomodoroSessionRepository : IPomodoroSessionReposito
     public async Task<PomodoroSession?> GetByIdAsync(PomodoroSessionId id, CancellationToken cancellationToken = default) =>
         await _context.PomodoroSessions.FindAsync([id], cancellationToken);
 
+    public async Task<IReadOnlyList<PomodoroSession>> GetByIdsAsync(IEnumerable<PomodoroSessionId> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await _context.PomodoroSessions
+            .Where(s => idList.Contains(s.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<PomodoroSession?> GetActiveAsync(CancellationToken cancellationToken = default) =>
         await _context.PomodoroSessions
             .FirstOrDefaultAsync(s => s.Status == PomodoroSessionStatus.Active, cancellationToken);

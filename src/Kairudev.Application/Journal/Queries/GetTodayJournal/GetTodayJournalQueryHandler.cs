@@ -40,16 +40,23 @@ public sealed class GetTodayJournalQueryHandler
         var allTasks = await _taskRepository.GetAllAsync(cancellationToken);
         var taskLookup = allTasks.ToDictionary(t => t.Id.Value, t => t.Title.Value);
 
+        var sessionIds = entries
+            .Where(e => PomodoroEventTypes.Contains(e.EventType))
+            .Select(e => PomodoroSessionId.From(e.ResourceId))
+            .Distinct()
+            .ToList();
+
+        var sessions = await _sessionRepository.GetByIdsAsync(sessionIds, cancellationToken);
+        var sessionLookup = sessions.ToDictionary(s => s.Id);
+
         var viewModels = new List<JournalEntryViewModel>(entries.Count);
         foreach (var entry in entries)
         {
             IReadOnlyList<string>? taskTitles = null;
             if (PomodoroEventTypes.Contains(entry.EventType))
             {
-                var session = await _sessionRepository.GetByIdAsync(
-                    PomodoroSessionId.From(entry.ResourceId), cancellationToken);
-
-                if (session is not null && session.LinkedTaskIds.Count > 0)
+                var sessionId = PomodoroSessionId.From(entry.ResourceId);
+                if (sessionLookup.TryGetValue(sessionId, out var session) && session.LinkedTaskIds.Count > 0)
                 {
                     taskTitles = session.LinkedTaskIds
                         .Where(id => taskLookup.ContainsKey(id.Value))

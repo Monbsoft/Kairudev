@@ -15,6 +15,12 @@ internal sealed class FakePomodoroSessionRepository : IPomodoroSessionRepository
     public Task<PomodoroSession?> GetByIdAsync(PomodoroSessionId id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Sessions.FirstOrDefault(s => s.Id == id));
 
+    public Task<IReadOnlyList<PomodoroSession>> GetByIdsAsync(IEnumerable<PomodoroSessionId> ids, CancellationToken cancellationToken = default)
+    {
+        var idSet = ids.ToHashSet();
+        return Task.FromResult<IReadOnlyList<PomodoroSession>>(Sessions.Where(s => idSet.Contains(s.Id)).ToList());
+    }
+
     public Task<PomodoroSession?> GetActiveAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult(Sessions.FirstOrDefault(s => s.Status == PomodoroSessionStatus.Active));
 
