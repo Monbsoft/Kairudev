@@ -345,8 +345,17 @@ else
     private async Task OnTimerCompleted()
     {
         await SoundService.PlayRingtoneAsync(_ringtonePreference);
-        _completedSessionType = _session?.SessionType;
-        await PomodoroApi.CompleteSessionAsync();
+
+        var completedType = _session?.SessionType;
+        var result = await PomodoroApi.CompleteSessionAsync();
+        if (result is null)
+        {
+            _errorMessage = "Impossible de terminer la session.";
+            StateHasChanged();
+            return;
+        }
+
+        _completedSessionType = completedType;
         _session = await PomodoroApi.GetCurrentSessionAsync();
         _remainingSeconds = 0;
 
