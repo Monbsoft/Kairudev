@@ -89,6 +89,21 @@ namespace Kairudev.Infrastructure.Persistence.Migrations
                     b.ToTable("PomodoroSessions", (string)null);
                 });
 
+            modelBuilder.Entity("Kairudev.Domain.Settings.UserSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ThemePreference")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserSettings", (string)null);
+                });
+
             modelBuilder.Entity("Kairudev.Domain.Tasks.DeveloperTask", b =>
                 {
                     b.Property<Guid>("Id")
