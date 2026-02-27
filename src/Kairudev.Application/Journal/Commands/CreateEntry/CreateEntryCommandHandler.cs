@@ -5,6 +5,7 @@ namespace Kairudev.Application.Journal.Commands.CreateEntry;
 public sealed class CreateEntryCommandHandler
 {
     private readonly IJournalEntryRepository _repository;
+    private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public CreateEntryCommandHandler(IJournalEntryRepository repository)
     {
@@ -15,16 +16,24 @@ public sealed class CreateEntryCommandHandler
         CreateEntryCommand command,
         CancellationToken cancellationToken = default)
     {
-        int? sequence = null;
-        if (command.EventType == JournalEventType.BreakCompleted)
+        await _semaphore.WaitAsync(cancellationToken);
+        try
         {
-            var today = DateOnly.FromDateTime(command.OccurredAt);
-            var count = await _repository.GetTodayCountByTypeAsync(JournalEventType.BreakCompleted, today, cancellationToken);
-            sequence = count + 1;
-        }
+            int? sequence = null;
+            if (command.EventType == JournalEventType.BreakCompleted)
+            {
+                var today = DateOnly.FromDateTime(command.OccurredAt);
+                var count = await _repository.GetTodayCountByTypeAsync(JournalEventType.BreakCompleted, today, cancellationToken);
+                sequence = count + 1;
+            }
 
-        var entry = JournalEntry.Create(command.EventType, command.ResourceId, command.OccurredAt, sequence);
-        await _repository.AddAsync(entry, cancellationToken);
-        return CreateEntryResult.Success();
+            var entry = JournalEntry.Create(command.EventType, command.ResourceId, command.OccurredAt, sequence);
+            await _repository.AddAsync(entry, cancellationToken);
+            return CreateEntryResult.Success();
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 }
