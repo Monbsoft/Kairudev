@@ -77,7 +77,7 @@ public sealed class PomodoroController : ControllerBase
         var result = await _getSuggestedType.HandleAsync(new GetSuggestedSessionTypeQuery(), ct);
         return Ok(new
         {
-            SuggestedType = result.SuggestedType,
+            SuggestedType = result.SuggestedType.ToString(),
             SprintDurationMinutes = result.SprintDurationMinutes,
             ShortBreakDurationMinutes = result.ShortBreakDurationMinutes,
             LongBreakDurationMinutes = result.LongBreakDurationMinutes
