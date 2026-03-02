@@ -35,7 +35,7 @@ public sealed class GetTodayJournalQueryHandler
         GetTodayJournalQuery query,
         CancellationToken cancellationToken = default)
     {
-        var entries = await _repository.GetTodayEntriesAsync(DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
+        var entries = await _repository.GetEntriesByDateAsync(DateOnly.FromDateTime(DateTime.UtcNow), cancellationToken);
 
         var allTasks = await _taskRepository.GetAllAsync(cancellationToken);
         var taskLookup = allTasks.ToDictionary(t => t.Id.Value, t => t.Title.Value);
