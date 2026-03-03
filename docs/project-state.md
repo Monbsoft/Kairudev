@@ -7,7 +7,7 @@
 
 ## Résumé état actuel
 
-**Dernière itération : #13 — BC Tickets — Intégration Jira** (2026-03-03)
+**Dernière itération : #14 — Navigation sidebar icônes seulement** (2026-03-03)
 
 **Bounded Contexts opérationnels :**
 - **Tasks** : 8 Commands/Queries — **Architecture CQRS** ✅ (🆕 LinkJiraTicket, UnlinkJiraTicket)
@@ -62,10 +62,37 @@
 | ~~bugfix~~ | ~~Pomodoro UI bloqué après fin de session (timer 0:00 + bouton Interrompre persistant)~~ | ~~✅ Livré~~ | ~~2026-03-02~~ |
 | ~~#12~~ | ~~Journal : navigation historique + numérotation sprints~~ | ~~✅ Livré~~ | ~~2026-03-02~~ |
 | ~~#13~~ | ~~BC Tickets — intégration Jira (liste, lien tâche, config)~~ | ~~✅ Livré~~ | ~~2026-03-03~~ |
+| ~~#14~~ | ~~Navigation sidebar — icônes seulement, style VS Code (Web + MAUI)~~ | ~~✅ Livré~~ | ~~2026-03-03~~ |
 
 ---
 
 ## Dernière itération livrée
+
+**#14 — Navigation sidebar icônes seulement** — Livré le 2026-03-03
+
+### Ce qui a été livré
+
+**UI Web (Blazor WASM)** ✅
+- `NavMenu.razor` : suppression des labels texte, ajout `title="..."` sur chaque `NavLink`, classe `nav-icon`
+- `NavMenu.razor.css` : icônes centrées (3rem×3rem), tooltip CSS pur via `content: attr(title)` + `::after`, `font-size: 1.4rem`
+- `MainLayout.razor.css` : sidebar réduite de 250px → **64px**
+- En-tête sidebar : "Kairudev" → lettre "K" (`.navbar-brand-icon`)
+
+**UI MAUI (Blazor Hybrid)** ✅
+- Mêmes changements que Web : `NavMenu.razor`, `NavMenu.razor.css`, `MainLayout.razor.css`
+
+### Impact
+- Navigation compacte : gain de 186px de largeur pour le contenu principal
+- Tooltips CSS pur (sans JS) : apparaissent au hover à droite de chaque icône
+- Style VS Code : icônes emoji centrées, hover/active avec fond semi-transparent
+- Cohérence Web ↔ MAUI
+
+### Dette technique introduite
+Aucune ✅
+
+---
+
+## Itération précédente
 
 **#13 — BC Tickets — Intégration Jira** — Livré le 2026-03-03
 
