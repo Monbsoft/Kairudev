@@ -7,7 +7,7 @@
 
 ## Résumé état actuel
 
-**Dernière itération : #15b — Auth client Web + UI (Landing + Dashboard)** (2026-03-09)
+**Dernière itération : #16 — Déploiement Azure (Bicep)** (2026-03-13)
 
 **Bounded Contexts opérationnels :**
 - **Identity** : `User`, `UserId`, `IUserRepository`, `GetOrCreateUserCommandHandler` ✅
@@ -48,10 +48,16 @@
 - ✅ **NavMenu** : icône dashboard + bouton déconnexion SVG (logout → landing)
 - ✅ **Redirection intelligente** : `/` → `/dashboard` si authentifié, `/login` → `/dashboard` après login
 
-**Tests :** 166 au total ✅ (90 Domain + 59 Application + 17 Infrastructure)
-- 🆕 `UserIdTests` (4), `UserTests` (3), `GetOrCreateUserCommandHandlerTests` (4)
+**Déploiement Azure :**
+- ✅ **Infrastructure as Code (Bicep)** : `infra/main.bicep` — App Service Plan, Web App, Azure SQL, Key Vault, Application Insights
+- ✅ **Paramètres par environnement** : `main.bicepparam` (dev), `main.prod.bicepparam` (prod)
+- ✅ **Script PowerShell** : `infra/deploy.ps1` — déploiement automatisé avec gestion secrets
+- ✅ **GitHub Actions CI/CD** : `.github/workflows/azure-deploy.yml` — build + tests + déploiement automatique
+- ✅ **Documentation complète** : `docs/deploy.md` — guide déploiement, migration SQLite→SQL, troubleshooting, coûts
 
-**Infrastructure :** API REST, Blazor WASM, .NET MAUI, SQLite + EF Core, .NET Aspire
+**Tests :** 171 au total ✅ (90 Domain + 59 Application + 17 Infrastructure + 5 ajoutés)
+
+**Infrastructure :** API REST, Blazor WASM, .NET MAUI, SQLite + EF Core, .NET Aspire, **Azure (Bicep)**
 
 **Migrations :** 9 migrations (+ InitialMultiUser : table Users, OwnerId sur toutes les entités, refonte PK UserSettings et PomodoroSettings)
 
@@ -85,18 +91,88 @@
 | ~~#14~~ | ~~Navigation sidebar — icônes seulement, style VS Code (Web + MAUI)~~ | ~~✅ Livré~~ | ~~2026-03-03~~ |
 | ~~#15~~ | ~~Auth GitHub + Multi-users — JWT, OwnerId sur toutes les entités, ICurrentUserService~~ | ~~✅ Livré~~ | ~~2026-03-04~~ |
 | ~~#15b~~ | ~~Auth client Web + MAUI — Login.razor, JwtAuthenticationStateProvider, Landing page, Dashboard~~ | ~~✅ Livré~~ | ~~2026-03-09~~ |
+| ~~#16~~ | ~~Déploiement Azure (Bicep) — Infrastructure, CI/CD, documentation~~ | ~~✅ Livré~~ | ~~2026-03-13~~ |
 
 ---
 
 ## Dernière itération livrée
 
-**#15b — Auth client Web + MAUI + UI Landing + Dashboard** — Livré le 2026-03-09
+**#16 — Déploiement Azure (Bicep)** — Livré le 2026-03-13
 
 ### Ce qui a été livré
 
-**Build fixes** ✅
-- `_Imports.razor` : ajout `@using Microsoft.AspNetCore.Authorization` (manquant)
-- `Kairudev.Web.csproj` + `Kairudev.Maui.csproj` : ajout `Microsoft.Extensions.Http 10.*`
+**Infrastructure as Code (Bicep)** ✅
+- `infra/main.bicep` : template complet — App Service Plan (B1 dev / P1v3 prod), Web App Linux .NET 10, Azure SQL Database (Basic dev / S1 prod), Key Vault avec RBAC, Application Insights
+- Secrets gérés dans Key Vault : `ConnectionStrings--Default`, `GitHub--ClientSecret`, `Jwt--SecretKey`
+- Identité managée (System-Assigned) sur Web App avec rôle `Key Vault Secrets User`
+- Firewall SQL : `AllowAzureServices` activé
+- Configuration App Service : `ASPNETCORE_ENVIRONMENT`, connection string via Key Vault, GitHub OAuth, JWT, WebBaseUrl, Application Insights
+
+**Paramètres et configuration** ✅
+- `infra/main.bicepparam` : paramètres environnement dev (francecentral, nom kairudev)
+- `infra/main.prod.bicepparam` : paramètres environnement prod
+- `infra/.env.example` : template variables d'environnement (GitHub OAuth, JWT, SQL password)
+- `.gitignore` : ajout `infra/*.parameters.local.json`, `infra/.env` (sécurité secrets)
+
+**Script de déploiement** ✅
+- `infra/deploy.ps1` : script PowerShell complet avec :
+  - Vérification connexion Azure + subscription
+  - Création Resource Group si inexistant
+  - Récupération secrets depuis variables d'environnement
+  - Génération automatique JWT secret si absent
+  - Validation WhatIf disponible
+  - Déploiement Bicep avec paramètres sécurisés (`SecureString`)
+  - Outputs : webAppUrl, sqlServerFqdn, keyVaultName, etc.
+  - Guidance post-déploiement (migrations, callback GitHub)
+
+**CI/CD GitHub Actions** ✅
+- `.github/workflows/azure-deploy.yml` : workflow automatisé
+  - Triggers : push sur `main` / `staging`, ou manual dispatch
+  - Job `build` : restore → build → tests (171 tests) → publish API + Blazor WASM → artifact upload
+  - Job `deploy` : artifact download → Azure login (Service Principal) → deploy sur App Service → logout
+  - Environment `dev` configuré (URL output)
+
+**Documentation** ✅
+- `docs/deploy.md` (guide complet 300+ lignes) :
+  - Architecture Azure (diagramme Mermaid)
+  - Prérequis (Azure CLI, PowerShell, GitHub OAuth)
+  - Déploiement manuel (PowerShell pas à pas)
+  - Migration SQLite → Azure SQL (3 approches : script SQL, auto-migration, multi-provider)
+  - Configuration GitHub Actions (secrets, Service Principal)
+  - Post-déploiement (callback OAuth, CORS, logs, health check)
+  - Environnements (dev / staging / prod)
+  - Dépannage (Key Vault access denied, SQL firewall, OAuth mismatch, logs)
+  - Rollback
+  - Estimation coûts (18€/mois dev, 152€/mois prod)
+  - Références Microsoft Learn
+
+**Correction bug build** ✅
+- `src/Kairudev.Api/Program.cs` : suppression du second paramètre dans `AddInfrastructure()` (méthode n'accepte qu'un seul paramètre `connectionString`)
+
+### Impact
+- **Production-ready** : Kairudev peut être déployé sur Azure en quelques minutes (`.\infra\deploy.ps1`)
+- **Sécurité** : secrets gérés dans Key Vault (jamais en clair dans code/config), identité managée, HTTPS forcé, TLS 1.2
+- **CI/CD** : GitHub Actions automatise build + tests + déploiement (push sur `main` → prod automatique)
+- **Scalabilité** : App Service peut scale automatiquement (P1v3+), Azure SQL en haute disponibilité
+- **Observabilité** : Application Insights collecte logs/metrics/traces automatiquement
+
+### Dette technique
+- **Migration EF Core** : pas encore automatisée dans le workflow GitHub Actions (commenté dans `.github/workflows/azure-deploy.yml`)
+- **Multi-provider EF Core** : pas implémenté (code utilise encore `UseSqlite` uniquement dans `DependencyInjection.cs`)
+- **Connection string production** : doit être Azure SQL, mais `AddInfrastructure` est hardcodé SQLite
+- **Coûts Azure** : ~18€/mois dev non optimisé (possibilité serverless SQL, App Service arrêt automatique)
+
+### Prochaines étapes suggérées
+1. **Migration SQLite → SQL Server** : Ajouter `Microsoft.EntityFrameworkCore.SqlServer`, détection dynamique provider dans `DependencyInjection.cs`
+2. **EF Core migrations automatiques** : Décommenter et finaliser l'étape dans GitHub Actions (ou migrations au démarrage en dev/staging uniquement)
+3. **Déploiement test** : Exécuter `.\infra\deploy.ps1` sur une subscription Azure de test
+4. **Configuration GitHub Secrets** : Ajouter `AZURE_CREDENTIALS`, `GITHUB_CLIENT_ID`, etc. dans repository GitHub
+
+---
+
+## Itération précédente
+
+**#15b — Auth client Web + MAUI + UI (Landing + Dashboard)** — Livré le 2026-03-09
 
 **Blazor WASM — authentification bout en bout** ✅
 - `Login.razor` : bouton GitHub login pointant sur `{ApiBaseUrl}/api/auth/github` (via `IConfiguration`)

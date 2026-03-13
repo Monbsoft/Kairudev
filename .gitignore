@@ -365,3 +365,10 @@ FodyWeavers.xsd
 kairudev.db
 kairudev.db-shm
 kairudev.db-wal
+
+# Azure Developer CLI (azd) — cache local uniquement
+.azure/
+
+# Secrets locaux Azure (ne JAMAIS commiter)
+infra/*.parameters.local.json
+infra/.env
