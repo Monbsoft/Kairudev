@@ -9,10 +9,10 @@ internal sealed class PomodoroSettingsConfiguration : IEntityTypeConfiguration<P
     public void Configure(EntityTypeBuilder<PomodoroSettingsRow> builder)
     {
         builder.ToTable("PomodoroSettings");
-        builder.HasKey(s => s.Id);
-        builder.Property(s => s.Id).ValueGeneratedNever();
-        builder.Property(s => s.SprintDurationMinutes).IsRequired();
-        builder.Property(s => s.ShortBreakDurationMinutes).IsRequired();
-        builder.Property(s => s.LongBreakDurationMinutes).IsRequired();
+        builder.HasKey(s => s.UserId);
+        builder.Property(s => s.UserId).HasColumnType("nvarchar(50)").HasMaxLength(50).ValueGeneratedNever();
+        builder.Property(s => s.SprintDurationMinutes).HasColumnType("int").IsRequired();
+        builder.Property(s => s.ShortBreakDurationMinutes).HasColumnType("int").IsRequired();
+        builder.Property(s => s.LongBreakDurationMinutes).HasColumnType("int").IsRequired();
     }
 }
