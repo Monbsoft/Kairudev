@@ -20,7 +20,12 @@ public static class DependencyInjection
         string connectionString)
     {
         services.AddDbContext<KairudevDbContext>(options =>
-            options.UseSqlite(connectionString));
+        {
+            if (IsSqliteConnectionString(connectionString))
+                options.UseSqlite(connectionString);
+            else
+                options.UseSqlServer(connectionString);
+        });
 
         services.AddScoped<IUserRepository, SqliteUserRepository>();
         services.AddScoped<ITaskRepository, SqliteTaskRepository>();
@@ -33,4 +38,8 @@ public static class DependencyInjection
 
         return services;
     }
+
+    private static bool IsSqliteConnectionString(string connectionString) =>
+        connectionString.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase)
+        && !connectionString.Contains(';');
 }
