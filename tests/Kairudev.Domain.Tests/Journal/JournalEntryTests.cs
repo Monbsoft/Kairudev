@@ -5,7 +5,7 @@ namespace Kairudev.Domain.Tests.Journal;
 
 public sealed class JournalEntryTests
 {
-    private static readonly UserId OwnerId = UserId.From("test-user");
+    private static readonly UserId OwnerId = UserId.New();
 
     private static JournalEntry CreateEntry(
         JournalEventType eventType = JournalEventType.SprintStarted,

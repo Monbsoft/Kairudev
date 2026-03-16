@@ -16,7 +16,7 @@ public sealed class UserSettings : AggregateRoot<UserId>
     public string? JiraApiToken { get; private set; }
 
     // Parameterless constructor required by EF Core for materialization
-    private UserSettings() : base(UserId.From(string.Empty)) { }
+    private UserSettings() : base(null!) { }
 
     private UserSettings(
         UserId userId,

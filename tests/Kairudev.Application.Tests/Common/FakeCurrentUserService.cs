@@ -5,5 +5,5 @@ namespace Kairudev.Application.Tests.Common;
 
 internal sealed class FakeCurrentUserService : ICurrentUserService
 {
-    public UserId CurrentUserId => UserId.From("test-github-id-123");
+    public UserId CurrentUserId => UserId.From(new Guid("00000000-0000-0000-0000-000000000001"));
 }

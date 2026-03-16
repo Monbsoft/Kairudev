@@ -6,7 +6,7 @@ namespace Kairudev.Domain.Tests.Tasks;
 
 public sealed class DeveloperTaskTests
 {
-    private static readonly UserId OwnerId = UserId.From("test-user");
+    private static readonly UserId OwnerId = UserId.New();
 
     private static DeveloperTask CreateValidTask(string title = "Write unit tests") =>
         DeveloperTask.Create(TaskTitle.Create(title).Value, null, DateTime.UtcNow, OwnerId);

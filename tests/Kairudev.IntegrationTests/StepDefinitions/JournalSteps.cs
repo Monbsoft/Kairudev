@@ -19,7 +19,7 @@ public class JournalSteps
     [When("I create a journal entry with event type \"([^\"]*)\" for resource \"([^\"]*)\"")]
     public void WhenCreateJournalEntry(string eventType, string resourceId)
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var entry = JournalEntry.Create(
             Enum.Parse<JournalEventType>(eventType),
@@ -59,7 +59,7 @@ public class JournalSteps
     [Given("I have a journal entry")]
     public void GivenJournalEntry()
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var entry = JournalEntry.Create(
             JournalEventType.TaskCompleted,
@@ -105,7 +105,7 @@ public class JournalSteps
     [Given("I have the following journal entries:")]
     public void GivenJournalEntries(DataTable table)
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
         var entries = new List<JournalEntry>();
 
         foreach (var row in table.Rows)

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kairudev.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSqlServer : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -81,7 +81,7 @@ namespace Kairudev.Infrastructure.Persistence.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     GitHubId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Login = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
@@ -96,7 +96,7 @@ namespace Kairudev.Infrastructure.Persistence.Migrations
                 name: "UserSettings",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ThemePreference = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     RingtonePreference = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "AlarmClock"),
                     JiraBaseUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),

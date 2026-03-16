@@ -35,7 +35,7 @@ public sealed class GetOrCreateUserCommandHandlerTests
 
         Assert.True(result.IsSuccess);
         Assert.Single(_repository.Users); // pas de doublon
-        Assert.Equal(UserId.From("gh-1"), result.Value!.UserId);
+        Assert.Equal(existing.Id, result.Value!.UserId);
     }
 
     [Fact]

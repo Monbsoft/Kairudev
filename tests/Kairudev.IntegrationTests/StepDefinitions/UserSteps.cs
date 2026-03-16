@@ -37,7 +37,7 @@ public class UserSteps
     {
         var user = (User)_scenarioContext["CreatedUser"];
         Assert.NotNull(user);
-        Assert.NotEmpty(user.Id.Value);
+        Assert.NotEqual(Guid.Empty, user.Id.Value);
     }
 
     [Then("the user should have display name \"([^\"]*)\"")]
@@ -84,7 +84,7 @@ public class UserSteps
     {
         var settings = (UserSettings)_scenarioContext["CurrentSettings"];
         Assert.NotNull(settings);
-        Assert.NotEmpty(settings.Id.Value);
+        Assert.NotEqual(Guid.Empty, settings.Id.Value);
     }
 
     [Then("the theme should be \"([^\"]*)\"")]

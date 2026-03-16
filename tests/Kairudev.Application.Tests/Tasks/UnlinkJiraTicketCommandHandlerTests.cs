@@ -18,7 +18,7 @@ public sealed class UnlinkJiraTicketCommandHandlerTests
     private static DeveloperTask CreateTaskWithJiraLink()
     {
         var title = TaskTitle.Create("Test task").Value;
-        var task = DeveloperTask.Create(title, null, DateTime.UtcNow, UserId.From("test-github-id-123"));
+        var task = DeveloperTask.Create(title, null, DateTime.UtcNow, UserId.New());
         task.LinkJiraTicket(JiraTicketKey.Create("PROJ-123").Value);
         return task;
     }
@@ -49,7 +49,7 @@ public sealed class UnlinkJiraTicketCommandHandlerTests
     public async Task Should_Succeed_When_TaskHasNoTicketLinked()
     {
         var title = TaskTitle.Create("No jira link").Value;
-        var task = DeveloperTask.Create(title, null, DateTime.UtcNow, UserId.From("test-github-id-123"));
+        var task = DeveloperTask.Create(title, null, DateTime.UtcNow, UserId.New());
         _repository.Tasks.Add(task);
 
         var result = await _handler.HandleAsync(

@@ -23,7 +23,10 @@ public sealed class ClaimsCurrentUserService : ICurrentUserService
             if (string.IsNullOrEmpty(sub))
                 throw new UnauthorizedAccessException("User is not authenticated.");
 
-            return UserId.From(sub);
+            if (!Guid.TryParse(sub, out var guid))
+                throw new UnauthorizedAccessException("User identifier is not a valid GUID.");
+
+            return UserId.From(guid);
         }
     }
 }

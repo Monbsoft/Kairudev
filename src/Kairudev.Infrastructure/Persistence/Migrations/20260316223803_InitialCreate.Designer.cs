@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kairudev.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(KairudevDbContext))]
-    [Migration("20260316181934_InitialSqlServer")]
-    partial class InitialSqlServer
+    [Migration("20260316223803_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,9 +27,8 @@ namespace Kairudev.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Kairudev.Domain.Identity.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -143,9 +142,8 @@ namespace Kairudev.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Kairudev.Domain.Settings.UserSettings", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("JiraApiToken")
                         .HasMaxLength(500)

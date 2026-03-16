@@ -25,7 +25,7 @@ public class TaskSteps
     [When("I create a task with title \"([^\"]*)\" and description \"([^\"]*)\"")]
     public void WhenCreateTask(string title, string description)
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var task = DeveloperTask.Create(
             TaskTitle.Create(title).Value,
@@ -67,7 +67,7 @@ public class TaskSteps
     [Given("I have a task \"([^\"]*)\" with status \"([^\"]*)\"")]
     public void GivenTaskWithStatus(string title, string status)
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var task = DeveloperTask.Create(
             TaskTitle.Create(title).Value,
@@ -126,7 +126,7 @@ public class TaskSteps
     [Given("I have a task \"([^\"]*)\"")]
     public void GivenTask(string title)
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var task = DeveloperTask.Create(
             TaskTitle.Create(title).Value,
@@ -144,7 +144,7 @@ public class TaskSteps
     [Given("I have the following tasks:")]
     public void GivenTasks(DataTable table)
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
         var tasks = new List<DeveloperTask>();
 
         foreach (var row in table.Rows)

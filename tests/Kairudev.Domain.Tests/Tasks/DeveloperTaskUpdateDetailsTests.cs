@@ -5,7 +5,7 @@ namespace Kairudev.Domain.Tests.Tasks;
 
 public sealed class DeveloperTaskUpdateDetailsTests
 {
-    private static readonly UserId OwnerId = UserId.From("test-user");
+    private static readonly UserId OwnerId = UserId.New();
 
     [Fact]
     public void Should_UpdateTitle_When_UpdateDetailsIsCalled()

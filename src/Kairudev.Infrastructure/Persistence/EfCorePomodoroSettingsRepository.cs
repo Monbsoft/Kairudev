@@ -17,7 +17,7 @@ internal sealed class EfCorePomodoroSettingsRepository : IPomodoroSettingsReposi
     public async Task<PomodoroSettings> GetByUserIdAsync(UserId userId, CancellationToken cancellationToken = default)
     {
         var row = await _context.PomodoroSettings
-            .FirstOrDefaultAsync(s => s.UserId == userId.Value, cancellationToken);
+            .FirstOrDefaultAsync(s => s.UserId == userId.Value.ToString(), cancellationToken);
 
         if (row is null)
             return PomodoroSettings.Default;
@@ -31,13 +31,13 @@ internal sealed class EfCorePomodoroSettingsRepository : IPomodoroSettingsReposi
     public async Task SaveAsync(PomodoroSettings settings, UserId userId, CancellationToken cancellationToken = default)
     {
         var row = await _context.PomodoroSettings
-            .FirstOrDefaultAsync(s => s.UserId == userId.Value, cancellationToken);
+            .FirstOrDefaultAsync(s => s.UserId == userId.Value.ToString(), cancellationToken);
 
         if (row is null)
         {
             row = new PomodoroSettingsRow
             {
-                UserId = userId.Value,
+                UserId = userId.Value.ToString(),
                 SprintDurationMinutes = settings.SprintDurationMinutes,
                 ShortBreakDurationMinutes = settings.ShortBreakDurationMinutes,
                 LongBreakDurationMinutes = settings.LongBreakDurationMinutes

@@ -8,7 +8,7 @@ namespace Kairudev.Domain.Tests.Pomodoro;
 public sealed class PomodoroSessionTests
 {
     private static readonly DateTime Now = new(2026, 1, 1, 9, 0, 0, DateTimeKind.Utc);
-    private static readonly UserId OwnerId = UserId.From("test-user");
+    private static readonly UserId OwnerId = UserId.New();
 
     private static PomodoroSession CreatePlanned(int minutes = 25) =>
         PomodoroSession.Create(PomodoroSessionType.Sprint, minutes, OwnerId);

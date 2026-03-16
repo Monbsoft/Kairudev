@@ -115,7 +115,7 @@ public sealed class AuthController : ControllerBase
 
         var claims = new[]
         {
-            new Claim("sub", user.UserId.Value),
+            new Claim("sub", user.UserId.Value.ToString()),
             new Claim("name", user.DisplayName),
             new Claim("login", user.Login),
         };

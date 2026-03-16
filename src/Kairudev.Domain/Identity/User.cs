@@ -22,5 +22,5 @@ public sealed class User : Entity<UserId>
     }
 
     public static User Create(string githubId, string login, string displayName, string? email)
-        => new(UserId.From(githubId), githubId, login, displayName, email);
+        => new(UserId.New(), githubId, login, displayName, email);
 }

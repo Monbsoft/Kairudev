@@ -20,7 +20,7 @@ public class PomodoroSteps
     [When("I start a Pomodoro session of (\\d+) minutes")]
     public void WhenStartSession(int minutes)
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var session = PomodoroSession.Create(
             PomodoroSessionType.Sprint,
@@ -59,7 +59,7 @@ public class PomodoroSteps
     [Given("I have a running Pomodoro session")]
     public void GivenRunningSession()
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var session = PomodoroSession.Create(
             PomodoroSessionType.Sprint,
@@ -97,7 +97,7 @@ public class PomodoroSteps
     [Given("I have a Pomodoro session")]
     public void GivenPomodoroSession()
     {
-        var userId = UserId.From("test-user");
+        var userId = UserId.New();
 
         var session = PomodoroSession.Create(
             PomodoroSessionType.Sprint,

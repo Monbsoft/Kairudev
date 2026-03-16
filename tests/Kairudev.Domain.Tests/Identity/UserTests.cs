@@ -16,11 +16,12 @@ public sealed class UserTests
     }
 
     [Fact]
-    public void Should_SetIdFromGitHubId_When_Created()
+    public void Should_GenerateGuidId_When_Created()
     {
         var user = User.Create("12345", "octocat", "The Octocat", null);
 
-        Assert.Equal(UserId.From("12345"), user.Id);
+        Assert.NotEqual(Guid.Empty, user.Id.Value);
+        Assert.NotEqual(user.GitHubId, user.Id.Value.ToString());
     }
 
     [Fact]

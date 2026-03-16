@@ -5,7 +5,7 @@ namespace Kairudev.Domain.Tests.Tasks;
 
 public sealed class DeveloperTaskJiraTests
 {
-    private static readonly UserId OwnerId = UserId.From("test-user");
+    private static readonly UserId OwnerId = UserId.New();
 
     private static DeveloperTask CreateTask() =>
         DeveloperTask.Create(

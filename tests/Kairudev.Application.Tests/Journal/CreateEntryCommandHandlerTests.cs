@@ -6,7 +6,7 @@ namespace Kairudev.Application.Tests.Journal;
 
 public sealed class CreateEntryCommandHandlerTests
 {
-    private static readonly UserId OwnerId = UserId.From("test-github-id-123");
+    private static readonly UserId OwnerId = UserId.New();
 
     private readonly FakeJournalEntryRepository _repository = new();
     private readonly CreateEntryCommandHandler _sut;

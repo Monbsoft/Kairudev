@@ -13,9 +13,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id)
-            .HasConversion(v => v.Value, v => UserId.From(v))
-            .HasColumnType("nvarchar(50)")
-            .HasMaxLength(50);
+            .HasConversion(v => v.Value, v => UserId.From(v));
 
         builder.Property(u => u.GitHubId).HasColumnType("nvarchar(50)").HasMaxLength(50).IsRequired();
         builder.HasIndex(u => u.GitHubId).IsUnique();
