@@ -57,8 +57,8 @@
 - ✅ Application en production : https://kairudev-prod.azurewebsites.net
 - ✅ Redéploiement : `powershell -ExecutionPolicy Bypass -File .\infra\deploy-linux.ps1 -Environment prod`
 
-**Tests :** 194 au total ✅ (111 Domain + 83 Application + 0 Infrastructure Sprint — migration EF intégrée) — *sera mis à jour après itération #18*
-⚠️ **Dette technique** : Tests d'intégration (`Kairudev.IntegrationTests`) non maintenus — step definitions obsolètes vs domain refactorisé
+**Tests :** 179 au total ✅ (111 Domain + 68 Application)
+⚠️ **Dette technique** : `Kairudev.Infrastructure.Tests` supprimé de la solution (résidu bin/obj uniquement). `Kairudev.IntegrationTests` non maintenu — step definitions obsolètes vs domain refactorisé
 
 **Infrastructure :** API REST, Blazor WASM, .NET MAUI, SQLite (local) + **Azure SQL (prod)**
 
