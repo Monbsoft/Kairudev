@@ -2,6 +2,7 @@ using Kairudev.Domain.Identity;
 using Kairudev.Domain.Journal;
 using Kairudev.Domain.Pomodoro;
 using Kairudev.Domain.Settings;
+using Kairudev.Domain.Sprint;
 using Kairudev.Domain.Tasks;
 using Kairudev.Infrastructure.Persistence.Configurations;
 using Kairudev.Infrastructure.Persistence.Internal;
@@ -20,6 +21,7 @@ public sealed class KairudevDbContext : DbContext
     public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
     public DbSet<JournalComment> JournalComments => Set<JournalComment>();
     public DbSet<UserSettings> UserSettings => Set<UserSettings>();
+    public DbSet<SprintSession> SprintSessions => Set<SprintSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +43,6 @@ public sealed class KairudevDbContext : DbContext
         modelBuilder.ApplyConfiguration(new JournalEntryConfiguration());
         modelBuilder.ApplyConfiguration(new JournalCommentConfiguration());
         modelBuilder.ApplyConfiguration(new UserSettingsConfiguration());
+        modelBuilder.ApplyConfiguration(new SprintSessionConfiguration());
     }
 }

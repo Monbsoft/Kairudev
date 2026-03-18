@@ -30,6 +30,8 @@ using Kairudev.Application.Tasks.Commands.DeleteTask;
 using Kairudev.Application.Tasks.Commands.LinkJiraTicket;
 using Kairudev.Application.Tasks.Commands.UnlinkJiraTicket;
 using Kairudev.Application.Tasks.Commands.UpdateTask;
+using Kairudev.Application.Sprint.Commands.RecordSprint;
+using Kairudev.Application.Sprint.Queries.GetTodaySprints;
 using Kairudev.Application.Tasks.Queries.ListTasks;
 using Kairudev.Application.Tickets.Queries.GetAssignedJiraTickets;
 using Kairudev.Api.Auth;
@@ -94,6 +96,10 @@ builder.Services.AddScoped<GetAssignedJiraTicketsQueryHandler>();
 // Tasks — Jira link/unlink handlers
 builder.Services.AddScoped<LinkJiraTicketCommandHandler>();
 builder.Services.AddScoped<UnlinkJiraTicketCommandHandler>();
+
+// Sprint — Command & Query Handlers
+builder.Services.AddScoped<RecordSprintCommandHandler>();
+builder.Services.AddScoped<GetTodaySprintsQueryHandler>();
 
 // Identity
 builder.Services.AddScoped<GetOrCreateUserCommandHandler>();

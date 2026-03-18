@@ -7,7 +7,19 @@
 @inject NavigationManager Nav
 @implements IAsyncDisposable
 
-<h2>Pomodoro</h2>
+<div class="d-flex align-items-center justify-content-between mb-1">
+    <h2 class="mb-0">Pomodoro</h2>
+    <div style="position:relative">
+        <button class="btn-more" @onclick="ToggleMoreMenu" title="Plus d'options"
+                aria-label="Plus d'options" aria-haspopup="true" aria-expanded="@_moreMenuOpen">&#xB7;&#xB7;&#xB7;</button>
+        @if (_moreMenuOpen)
+        {
+            <div class="dropdown-menu-simple">
+                <button @onclick="NavigateToSprintLibre">Sprint libre</button>
+            </div>
+        }
+    </div>
+</div>
 
 @if (!_loaded)
 {
@@ -184,6 +196,17 @@ else
 }
 
 @code {
+    // ── Menu contextuel ───────────────────────────────────────────────────
+    private bool _moreMenuOpen;
+
+    private void ToggleMoreMenu() => _moreMenuOpen = !_moreMenuOpen;
+
+    private void NavigateToSprintLibre()
+    {
+        _moreMenuOpen = false;
+        Nav.NavigateTo("/pomodoro/libre");
+    }
+
     // ── Constantes SVG ─────────────────────────────────────────────────────
     private const double Radius = 95.0;
     private readonly double _circumference = 2 * Math.PI * Radius;

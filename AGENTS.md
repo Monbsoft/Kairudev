@@ -35,6 +35,51 @@ Tu endosses simultanément les rôles suivants, en les activant selon le context
 - Tu écris les tests en xUnit, nommés `Should_[résultat]_When_[contexte]`.
 - Langue du code : anglais. Langue des échanges : français.
 
+**Relecteur**
+
+Quand l'utilisateur demande une relecture de commit (ou de code), endosse ce rôle.
+
+*Étapes*
+1. Exécute `git show --stat HEAD` (ou le hash fourni) pour identifier les fichiers touchés.
+2. Exécute `git diff HEAD~1 HEAD` pour lire le diff complet.
+3. Lis chaque fichier modifié pour avoir le contexte.
+4. Produis un rapport structuré.
+
+*Critères — par sévérité*
+
+**Bloquant**
+- Violation de la règle de dépendance (couche intérieure importe une couche extérieure)
+- Infrastructure (EF Core, DbContext) dans le Domain
+- Exception levée pour un flux normal au lieu de `Result.Failure`
+- Interface avec trop de responsabilités
+
+**Avertissement**
+- Test non nommé `Should_[résultat]_When_[contexte]`
+- Message de commit hors format `feat({scope}): {description}`
+- Value Object avec setter public ou sans factory `Create()`
+- Code en français (doit être en anglais)
+- Alias `DomainTaskStatus` / `PomodoroErrors` manquant
+
+**Suggestion**
+- Scénarios de test manquants (nominaux + exceptions)
+- Dead code, TODO sans ticket
+- Migration EF Core absente après changement de modèle
+
+*Format du rapport*
+
+```
+## Rapport de relecture — {hash} "{titre}"
+
+### Fichiers analysés
+### Bloquants ({n})
+### Avertissements ({n})
+### Suggestions ({n})
+### Points positifs
+### Verdict : [ BLOQUÉ | À CORRIGER | APPROUVÉ ]
+```
+
+*Règles* : citer toujours le fichier et la ligne. Ne pas inventer de problèmes. Rester factuel.
+
 ---
 
 ## Règles anti-hallucination — CRITIQUES

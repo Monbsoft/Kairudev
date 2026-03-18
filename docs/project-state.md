@@ -7,6 +7,8 @@
 
 ## Résumé état actuel
 
+**Itération en cours : #17 — BC Sprint libre (chronomètre à durée variable)** ✅ COMPLÉTÉE
+
 **Dernière itération : #16 — Déploiement Azure (Bicep + CLI)** (2026-03-16) ✅ COMPLÉTÉE
 
 **Bounded Contexts opérationnels :**
@@ -16,13 +18,14 @@
 - **Journal** : 6 Commands/Queries — **Architecture CQRS** ✅ (filtrés par `UserId`)
 - **Settings** : 4 Commands/Queries — **Architecture CQRS** ✅ (filtrés par `UserId`)
 - **Tickets** : 1 Query — **Architecture CQRS** ✅
+- **Sprint** : 2 Commands/Queries — **Architecture CQRS** ✅ (timer client-side, journal automatique)
 
 **Architecture Application Layer :**
 - ✅ **CQRS sans MediatR** : Commands (écriture) + Queries (lecture)
 - ✅ **Handlers** retournent directement des `Result` (plus de Presenters)
 - ✅ **Injection directe** dans les Controllers (pas de mediator)
 - ✅ **ICurrentUserService** : abstraction application-layer pour l'identité courante
-- ✅ **30 use cases** (8 Tasks + 10 Pomodoro + 6 Journal + 4 Settings + 1 Tickets + 1 Identity)
+- ✅ **32 use cases** (8 Tasks + 10 Pomodoro + 6 Journal + 4 Settings + 1 Tickets + 1 Identity + 2 Sprint)
 
 **Authentification (bout en bout) :**
 - ✅ GitHub OAuth 2.0 (`GET /api/auth/github` → callback → JWT HS256)
@@ -52,7 +55,7 @@
 - ✅ Application en production : https://kairudev-prod.azurewebsites.net
 - ✅ Redéploiement : `powershell -ExecutionPolicy Bypass -File .\infra\deploy-linux.ps1 -Environment prod`
 
-**Tests :** 171 au total ✅ (90 Domain + 59 Application + 17 Infrastructure)
+**Tests :** 194 au total ✅ (111 Domain + 83 Application + 0 Infrastructure Sprint — migration EF intégrée)
 ⚠️ **Dette technique** : Tests d'intégration (`Kairudev.IntegrationTests`) non maintenus — step definitions obsolètes vs domain refactorisé
 
 **Infrastructure :** API REST, Blazor WASM, .NET MAUI, SQLite (local) + **Azure SQL (prod)**
@@ -88,10 +91,71 @@
 | ~~#15~~ | ~~Auth GitHub + Multi-users — JWT, OwnerId sur toutes les entités, ICurrentUserService~~ | ~~✅ Livré~~ | ~~2026-03-04~~ |
 | ~~#15b~~ | ~~Auth client Web + MAUI — Login.razor, JwtAuthenticationStateProvider, Landing page, Dashboard~~ | ~~✅ Livré~~ | ~~2026-03-09~~ |
 | ~~#16~~ | ~~Déploiement Azure — Bicep (subscription scope), CLI, ZIP cross-platform, deploy-linux.ps1, prod en direct~~ | ~~✅ Livré~~ | ~~2026-03-16~~ |
+| ~~#17~~ | ~~BC Sprint libre — chronomètre count-up, durée variable, lien tâche, journal auto~~ | ~~✅ Livré~~ | ~~2026-03-18~~ |
 
 ---
 
 ## Dernière itération livrée
+
+**#17 — BC Sprint libre** — Livré le 2026-03-18
+
+### Ce qui a été livré
+
+**Domain** ✅
+- `SprintSessionId` : wrapper Guid, factory `New()` + `From()`
+- `SprintName` : Value Object (max 200 chars), nom par défaut "Sprint #N" si vide
+- `SprintOutcome` : enum `Completed | Interrupted`
+- `SprintSession` : agrégat racine — `Record()` factory, validation `endedAt > startedAt`, `Duration` computed
+- `SprintDomainErrors` : constantes d'erreur domaine Sprint
+- `ISprintSessionRepository` : `AddAsync` + `GetByDateAsync(date, ownerId)`
+
+**Application (CQRS)** ✅
+- `RecordSprintCommandHandler` : crée `SprintSession`, persiste, crée 2 entrées journal rétroactives (SprintStarted + SprintCompleted/Interrupted)
+- `GetTodaySprintsQueryHandler` : liste des sprints du jour, triés chronologiquement
+- `SprintSessionViewModel` : DTO de sortie
+
+**Infrastructure** ✅
+- `SprintSessionConfiguration` : mapping EF Core (`uniqueidentifier`, `datetimeoffset`, OwnsOne pour SprintName)
+- `EfCoreSprintSessionRepository` : implémentation SQLite/SQL Server
+- Migration `AddSprintSessions` : table `SprintSessions` avec toutes les colonnes
+
+**API** ✅
+- `POST /api/sprints` — enregistre un sprint (Completed ou Interrupted)
+- `GET /api/sprints/today` — liste les sprints du jour
+- `SprintsController` avec `[Authorize]`
+- Handlers enregistrés dans `Program.cs`
+
+**UI Web (Blazor WASM)** ✅
+- `Pomodoro.razor` : bouton `···` en haut à droite → menu contextuel → "Sprint libre" → navigation `/pomodoro/libre`
+- `SprintLibre.razor` (page `/pomodoro/libre`) : champ nom, dropdown tâche, chrono count-up HH:mm:ss, boutons Démarrer/Terminer/Interrompre, historique du jour
+- `SprintApiClient` + `SprintDto` / `RecordSprintRequest`
+- `SprintApiClient` enregistré dans `Program.cs`
+- NavMenu inchangé (pas d'entrée dédiée Sprint libre)
+
+**UI MAUI (Blazor Hybrid)** ✅
+- Même logique : bouton `···` sur `Pomodoro.razor` → `SprintLibre.razor` (`/pomodoro/libre`)
+- `MauiProgram.cs` : `SprintApiClient` enregistré
+
+**Tests** ✅ (+23 tests)
+- `SprintNameTests` : 6 tests (valide, vide, whitespace, null, trop long, max length)
+- `SprintSessionTests` : 7 tests (nominal, durée, interrupted, linkedTask, endedAt <= startedAt, IDs uniques)
+- `RecordSprintCommandHandlerTests` : 10 tests (persist, defaultName, viewModel, linkedTask, interrupted, 2 journal entries, timestamps rétroactifs, validation)
+- `GetTodaySprintsQueryHandlerTests` : 5 tests (vide, sessions, filtre userId, ordre chronologique, viewModel)
+
+### Impact
+- L'utilisateur peut démarrer un sprint de durée libre, nommer le sprint, lier une tâche
+- Le chronomètre s'incrémente en temps réel (PeriodicTimer, 1 seconde)
+- Le journal reçoit automatiquement SprintStarted + SprintCompleted/Interrupted avec timestamps rétroactifs
+- L'historique du jour s'actualise après chaque sprint
+- Implémentation conforme ADR-012 : timer purement client-side, aucun état serveur pendant le sprint
+
+### Dette technique introduite
+- Tests d'intégration EF Core pour `EfCoreSprintSessionRepository` non écrits (test project Infrastructure absent)
+- Duplication Web/MAUI (Sprint.razor + DTOs) — dette ADR-008 existante
+
+---
+
+## Itération précédente
 
 **#16 — Déploiement Azure (Bicep)** — Livré le 2026-03-13
 

@@ -104,3 +104,50 @@ Les diagrammes Mermaid s'insèrent dans la spec là où ils apportent de la clar
 - `docs/project-state.md` — état courant
 - `docs/spec.md` — spécification
 - `CLAUDE.md` / `AGENTS.md` — instructions complètes
+
+---
+
+## Rôle : Relecteur (relecture de commit)
+
+Quand l'utilisateur demande une relecture de commit ou de code, endosse le rôle **Relecteur**.
+
+### Étapes
+
+1. `git show --stat HEAD` — fichiers touchés + message
+2. `git diff HEAD~1 HEAD` — diff complet
+3. Lire chaque fichier modifié pour le contexte
+4. Produire le rapport structuré
+
+### Critères de relecture
+
+**Bloquant**
+- Violation règle de dépendance : une couche intérieure (Domain/Application) importe une couche extérieure
+- EF Core / DbContext présent dans `Kairudev.Domain`
+- Exception pour flux normal au lieu de `Result.Failure<T>`
+- Interface Application avec plusieurs responsabilités
+
+**Avertissement**
+- Test non nommé `Should_[résultat]_When_[contexte]`
+- Message de commit hors format `feat({scope}): description`
+- Value Object avec setter public ou sans `Create()` retournant `Result<T>`
+- Code en français (doit être en anglais)
+- `TaskStatus` sans alias `DomainTaskStatus` / `DomainErrors` sans alias `PomodoroErrors`
+
+**Suggestion**
+- Tests manquants sur scénarios nominaux ou d'exception
+- Dead code ou TODO sans référence
+- Migration EF Core absente après modification de modèle
+
+### Format du rapport
+
+```
+## Rapport de relecture — {hash} "{titre}"
+### Fichiers analysés
+### Bloquants ({n})      [fichier:ligne] description
+### Avertissements ({n}) [fichier:ligne] description
+### Suggestions ({n})    [fichier:ligne] description
+### Points positifs
+### Verdict : [ BLOQUÉ | À CORRIGER | APPROUVÉ ]
+```
+
+Toujours citer le fichier et la ligne. Ne pas inventer de problèmes. Rester factuel.
