@@ -1331,13 +1331,20 @@ classDiagram
 **Préconditions :** Utilisateur authentifié, sprint démarré côté client
 **Postconditions (succès) :** Sprint persisté. Journal : entrée `SprintStarted` (rétroactive, timestamp = `startedAt`) + `SprintCompleted` ou `SprintInterrupted`. Types d'événements réutilisés depuis le BC Journal (ADR-012).
 
+**Accès UX :**
+- La page `/pomodoro` affiche un bouton **`···`** en haut à droite
+- Au clic, un menu contextuel s'ouvre avec l'option **"Sprint libre"**
+- Clic → navigation vers **`/pomodoro/libre`**
+- Pas d'entrée dédiée dans le NavMenu (accès exclusivement via le menu `···`)
+
 **Scénario nominal :**
-1. L'utilisateur voit le champ "Nom du sprint" (défaut : "Sprint #N", N = nb sprints du jour + 1)
-2. Il modifie le nom si souhaité (seulement avant démarrage)
-3. Il sélectionne optionnellement une tâche liée dans un dropdown
-4. Il clique **Démarrer** → le client mémorise `startedAt = now`, le chronomètre s'incrémente
-5. Il clique **Terminer** → le client appelle `POST /api/sprints` avec `outcome=Completed`
-6. Le sprint apparaît dans l'historique du jour
+1. L'utilisateur est sur `/pomodoro`, clique **`···`** → **"Sprint libre"** → arrive sur `/pomodoro/libre`
+2. Il voit le champ "Nom du sprint" (défaut : "Sprint #N", N = nb sprints du jour + 1)
+3. Il modifie le nom si souhaité (seulement avant démarrage)
+4. Il sélectionne optionnellement une tâche liée dans un dropdown
+5. Il clique **Démarrer** → le client mémorise `startedAt = now`, le chronomètre s'incrémente
+6. Il clique **Terminer** → le client appelle `POST /api/sprints` avec `outcome=Completed`
+7. Le sprint apparaît dans l'historique du jour (bas de page)
 
 **Scénarios alternatifs :**
 - A1 : Clic sur **Interrompre** → `POST /api/sprints` avec `outcome=Interrupted`, durée réelle enregistrée
@@ -1349,6 +1356,9 @@ classDiagram
 - E2 : `endedAt <= startedAt` → erreur de validation domaine
 
 **Critères d'acceptance :**
+- [ ] Bouton `···` visible sur `/pomodoro`, ouvre un menu avec l'option "Sprint libre"
+- [ ] "Sprint libre" navigue vers `/pomodoro/libre`
+- [ ] Pas d'entrée dédiée dans le NavMenu
 - [ ] Le chronomètre s'incrémente en temps réel (PeriodicTimer côté client)
 - [ ] Le nom n'est plus modifiable une fois le sprint démarré
 - [ ] La durée réelle (`endedAt - startedAt`) est persistée
@@ -1358,7 +1368,7 @@ classDiagram
 ### UC-SP-02 — Consulter les sprints du jour
 
 **Acteur principal :** Développeur
-**Préconditions :** Utilisateur authentifié
+**Préconditions :** Utilisateur authentifié, sur `/pomodoro/libre`
 **Postconditions :** Liste des sprints enregistrés aujourd'hui, triés chronologiquement.
 
 **Critères d'acceptance :**

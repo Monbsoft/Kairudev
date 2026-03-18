@@ -46,6 +46,7 @@ public static class MauiProgram
 		builder.Services.AddScoped<JournalApiClient>();
 		builder.Services.AddScoped<SettingsApiClient>();
 		builder.Services.AddScoped<TicketApiClient>();
+		builder.Services.AddScoped<SprintApiClient>();
 
 		return builder.Build();
 	}
