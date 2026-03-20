@@ -450,9 +450,9 @@ Si le modèle change en cours d'itération, les diagrammes concernés sont mis �
   - Après implémentation API/UI
 
 ### À la fin d'une itération
-1. **Commit final** : tous les changements documentés
-2. **Build et tests finaux** : validation complète
-3. **Mise à jour `docs/project-state.md`** : documenter l'itération
+1. **Build et tests finaux** : validation complète
+2. **Mise à jour `docs/project-state.md`** : documenter l'itération
+3. **Commit final** : tous les changements incluant la documentation
 4. **Push de la branche** : `git push -u origin feature/{numero}-{nom-court}`
 5. **Créer une Pull Request** :
    - Titre : `feat({numero}): {nom de l'itération}`

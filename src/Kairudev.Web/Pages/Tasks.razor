@@ -1,6 +1,7 @@
 @page "/tasks"
 @attribute [Authorize]
 @using Kairudev.Web.Services
+@using Markdig
 @inject TaskApiClient Api
 @inject TicketApiClient TicketApi
 @inject NavigationManager Nav
@@ -53,7 +54,7 @@ else
                         </div>
                         @if (!string.IsNullOrWhiteSpace(task.Description))
                         {
-                            <small class="text-muted d-block mt-1">@task.Description</small>
+                            <div class="text-muted small mt-1">@((MarkupString)RenderMarkdown(task.Description))</div>
                         }
                         @if (linkingTaskId == task.Id)
                         {
@@ -92,6 +93,12 @@ else
 }
 
 @code {
+    private static readonly MarkdownPipeline _pipeline =
+        new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+
+    private string RenderMarkdown(string? md) =>
+        string.IsNullOrWhiteSpace(md) ? string.Empty : Markdown.ToHtml(md, _pipeline);
+
     private List<TaskDto>? tasks;
     private string newTitle = string.Empty;
     private string newDescription = string.Empty;
