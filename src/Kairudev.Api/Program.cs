@@ -32,6 +32,7 @@ using Kairudev.Application.Tasks.Commands.UnlinkJiraTicket;
 using Kairudev.Application.Tasks.Commands.UpdateTask;
 using Kairudev.Application.Sprint.Commands.RecordSprint;
 using Kairudev.Application.Sprint.Queries.GetTodaySprints;
+using Kairudev.Application.Tasks.Queries.GetTaskById;
 using Kairudev.Application.Tasks.Queries.ListTasks;
 using Kairudev.Application.Tickets.Queries.GetAssignedJiraTickets;
 using Kairudev.Api.Auth;
@@ -59,6 +60,7 @@ builder.Services.AddInfrastructure(connectionString);
 // Tasks — Command & Query Handlers
 builder.Services.AddScoped<AddTaskCommandHandler>();
 builder.Services.AddScoped<ListTasksQueryHandler>();
+builder.Services.AddScoped<GetTaskByIdQueryHandler>();
 builder.Services.AddScoped<CompleteTaskCommandHandler>();
 builder.Services.AddScoped<DeleteTaskCommandHandler>();
 builder.Services.AddScoped<ChangeTaskStatusCommandHandler>();

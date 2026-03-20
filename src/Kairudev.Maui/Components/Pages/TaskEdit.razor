@@ -96,8 +96,7 @@ else
             Nav.NavigateTo("/login", forceLoad: false);
             return;
         }
-        var all = await Api.GetAllAsync();
-        task = all.FirstOrDefault(t => t.Id == Id);
+        task = await Api.GetByIdAsync(Id);
         notFound = task is null;
         if (task is not null)
         {
