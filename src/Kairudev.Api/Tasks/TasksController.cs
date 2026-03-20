@@ -5,6 +5,7 @@ using Kairudev.Application.Tasks.Commands.DeleteTask;
 using Kairudev.Application.Tasks.Commands.LinkJiraTicket;
 using Kairudev.Application.Tasks.Commands.UnlinkJiraTicket;
 using Kairudev.Application.Tasks.Commands.UpdateTask;
+using Kairudev.Application.Tasks.Queries.GetTaskById;
 using Kairudev.Application.Tasks.Queries.ListTasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ public sealed class TasksController : ControllerBase
 {
     private readonly AddTaskCommandHandler _addTask;
     private readonly ListTasksQueryHandler _listTasks;
+    private readonly GetTaskByIdQueryHandler _getTaskById;
     private readonly CompleteTaskCommandHandler _completeTask;
     private readonly DeleteTaskCommandHandler _deleteTask;
     private readonly ChangeTaskStatusCommandHandler _changeStatus;
@@ -28,6 +30,7 @@ public sealed class TasksController : ControllerBase
     public TasksController(
         AddTaskCommandHandler addTask,
         ListTasksQueryHandler listTasks,
+        GetTaskByIdQueryHandler getTaskById,
         CompleteTaskCommandHandler completeTask,
         DeleteTaskCommandHandler deleteTask,
         ChangeTaskStatusCommandHandler changeStatus,
@@ -37,6 +40,7 @@ public sealed class TasksController : ControllerBase
     {
         _addTask = addTask;
         _listTasks = listTasks;
+        _getTaskById = getTaskById;
         _completeTask = completeTask;
         _deleteTask = deleteTask;
         _changeStatus = changeStatus;
@@ -50,6 +54,13 @@ public sealed class TasksController : ControllerBase
     {
         var result = await _listTasks.HandleAsync(new ListTasksQuery(), ct);
         return Ok(result.Tasks);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+    {
+        var result = await _getTaskById.HandleAsync(new GetTaskByIdQuery(id), ct);
+        return result.Task is null ? NotFound() : Ok(result.Task);
     }
 
     [HttpPost]

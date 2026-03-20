@@ -7,9 +7,11 @@
 
 ## Résumé état actuel
 
-**Itération en cours : #17 — BC Sprint libre (chronomètre à durée variable)** ✅ COMPLÉTÉE
+**Dernière itération complétée : #18 — Éditeur Markdown + navigation pages dédiées** ✅ COMPLÉTÉE (2026-03-20)
 
-**Dernière itération : #16 — Déploiement Azure (Bicep + CLI)** (2026-03-16) ✅ COMPLÉTÉE
+**Itération précédente : #17 — BC Sprint libre (chronomètre à durée variable)** ✅ COMPLÉTÉE
+
+**Itération : #16 — Déploiement Azure (Bicep + CLI)** (2026-03-16) ✅ COMPLÉTÉE
 
 **Bounded Contexts opérationnels :**
 - **Identity** : `User`, `UserId`, `IUserRepository`, `GetOrCreateUserCommandHandler` ✅
@@ -55,8 +57,8 @@
 - ✅ Application en production : https://kairudev-prod.azurewebsites.net
 - ✅ Redéploiement : `powershell -ExecutionPolicy Bypass -File .\infra\deploy-linux.ps1 -Environment prod`
 
-**Tests :** 194 au total ✅ (111 Domain + 83 Application + 0 Infrastructure Sprint — migration EF intégrée)
-⚠️ **Dette technique** : Tests d'intégration (`Kairudev.IntegrationTests`) non maintenus — step definitions obsolètes vs domain refactorisé
+**Tests :** 179 au total ✅ (111 Domain + 68 Application)
+⚠️ **Dette technique** : `Kairudev.Infrastructure.Tests` supprimé de la solution (résidu bin/obj uniquement). `Kairudev.IntegrationTests` non maintenu — step definitions obsolètes vs domain refactorisé
 
 **Infrastructure :** API REST, Blazor WASM, .NET MAUI, SQLite (local) + **Azure SQL (prod)**
 
@@ -92,6 +94,7 @@
 | ~~#15b~~ | ~~Auth client Web + MAUI — Login.razor, JwtAuthenticationStateProvider, Landing page, Dashboard~~ | ~~✅ Livré~~ | ~~2026-03-09~~ |
 | ~~#16~~ | ~~Déploiement Azure — Bicep (subscription scope), CLI, ZIP cross-platform, deploy-linux.ps1, prod en direct~~ | ~~✅ Livré~~ | ~~2026-03-16~~ |
 | ~~#17~~ | ~~BC Sprint libre — chronomètre count-up, durée variable, lien tâche, journal auto~~ | ~~✅ Livré~~ | ~~2026-03-18~~ |
+| ~~#18~~ | ~~Éditeur Markdown + navigation pages dédiées — Markdig, onglets Éditer/Prévisualiser, pages TaskDetail/TaskEdit, suppression modale~~ | ~~✅ Livré~~ | ~~2026-03-20~~ |
 
 ---
 
