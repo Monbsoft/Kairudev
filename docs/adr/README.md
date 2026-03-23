@@ -8,6 +8,7 @@ Ce dossier contient les décisions architecturales importantes du projet Kairude
 |---|---|---|---|
 | [ADR-003](003-migration-cqrs-sans-mediatr.md) | Migration vers CQRS sans MediatR | ✅ Accepté | 2026-02-XX |
 | [ADR-004](004-theme-parametrable.md) | Thème paramétrable (Dark mode) | ✅ Accepté | 2026-02-XX |
+| [ADR-005](005-sprint-libre-pomodoro-duree-inconnue.md) | Sprint libre = Pomodoro à durée inconnue | ✅ Accepté | 2026-03-25 |
 
 ## Format
 

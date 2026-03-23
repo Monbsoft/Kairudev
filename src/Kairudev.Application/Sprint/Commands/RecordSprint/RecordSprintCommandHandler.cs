@@ -37,7 +37,7 @@ public sealed class RecordSprintCommandHandler : ICommandHandler<RecordSprintCom
 
         _logger.LogDebug("Recording sprint {SprintNumber} for user {UserId}", command.SprintNumber, userId);
 
-        var nameResult = SprintName.Create(command.Name, command.SprintNumber);
+        var nameResult = SprintName.Create(null, command.SprintNumber);
         if (nameResult.IsFailure)
             return RecordSprintResult.Failure(nameResult.Error);
 
@@ -81,7 +81,8 @@ public sealed class RecordSprintCommandHandler : ICommandHandler<RecordSprintCom
                 completionEventType,
                 session.Id.Value,
                 command.EndedAt.UtcDateTime,
-                userId),
+                userId,
+                command.Note),
             cancellationToken);
 
         return RecordSprintResult.Success(SprintSessionViewModel.From(session));

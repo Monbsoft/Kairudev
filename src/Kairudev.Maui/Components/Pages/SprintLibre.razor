@@ -26,10 +26,10 @@ else
         {
             <div style="width:100%;max-width:480px">
                 <div class="mb-3">
-                    <label class="form-label">Nom du sprint</label>
+                    <label class="form-label">Note (optionnelle)</label>
                     <input class="form-control"
-                           placeholder="Sprint #@(_todaySprints.Count + 1)"
-                           @bind="_sprintName"
+                           placeholder="Ex. daily un peu long, bloqué sur X…"
+                           @bind="_note"
                            @bind:event="oninput" />
                 </div>
                 <div class="mb-3">
@@ -53,7 +53,7 @@ else
         @if (_running)
         {
             <div class="text-muted">
-                @(_sprintName.Trim() is { Length: > 0 } name ? name : $"Sprint #{_todaySprints.Count + 1}") en cours
+                Sprint #@(_todaySprints.Count + 1) en cours
             </div>
         }
 
@@ -131,7 +131,7 @@ else
     // ── État ──────────────────────────────────────────────────────────────
     private bool _loaded;
     private bool _running;
-    private string _sprintName = string.Empty;
+    private string _note = string.Empty;
     private string _selectedTaskId = string.Empty;
     private DateTimeOffset _startedAt;
     private int _elapsedSeconds;
@@ -197,12 +197,12 @@ else
         _errorMessage = null;
 
         var sprintNumber = _todaySprints.Count + 1;
-        var name = _sprintName.Trim() is { Length: > 0 } n ? n : null;
+        var note = _note.Trim() is { Length: > 0 } n ? n : null;
 
         Guid? linkedTaskId = Guid.TryParse(_selectedTaskId, out var taskGuid) ? taskGuid : null;
 
         var request = new RecordSprintRequest(
-            name,
+            note,
             _startedAt,
             endedAt,
             outcome,
@@ -217,7 +217,7 @@ else
         }
 
         _lastRecorded = recorded;
-        _sprintName = string.Empty;
+        _note = string.Empty;
         _selectedTaskId = string.Empty;
         _elapsedSeconds = 0;
 

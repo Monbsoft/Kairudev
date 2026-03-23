@@ -10,7 +10,7 @@ public sealed record SprintSessionDto(
     Guid? LinkedTaskId);
 
 public sealed record RecordSprintRequest(
-    string? Name,
+    string? Note,
     DateTimeOffset StartedAt,
     DateTimeOffset EndedAt,
     string Outcome,

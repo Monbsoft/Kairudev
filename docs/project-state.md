@@ -7,11 +7,11 @@
 
 ## Résumé état actuel
 
-**Dernière itération complétée : #21 — Tags sur les tâches** ✅ COMPLÉTÉE (2026-03-25)
+**Dernière itération complétée : #22 — Note sur le sprint libre** ✅ COMPLÉTÉE (2026-03-25)
 
-**Prochaine itération prévue : #22 — à définir**
+**Prochaine itération prévue : #23 — Fusion SprintSession / PomodoroSession (ADR-005)**
 
-**Itération précédente : #20 — Filtrage et tri des tâches** ✅ COMPLÉTÉE (2026-03-24)
+**Itération précédente : #21 — Tags sur les tâches** ✅ COMPLÉTÉE (2026-03-25)
 
 **Itération précédente : #18 — Éditeur Markdown + navigation pages dédiées** ✅ COMPLÉTÉE (2026-03-20)
 
@@ -24,7 +24,7 @@
 - **Journal** : 6 Commands/Queries — **Architecture CQRS** ✅ (filtrés par `UserId`)
 - **Settings** : 4 Commands/Queries — **Architecture CQRS** ✅ (filtrés par `UserId`)
 - **Tickets** : 1 Query — **Architecture CQRS** ✅ (**désactivé côté UI depuis #19**)
-- **Sprint** : 2 Commands/Queries — **Architecture CQRS** ✅ (timer client-side, journal automatique)
+- **Sprint** : 2 Commands/Queries — **Architecture CQRS** ✅ (timer client-side, journal automatique, note comme commentaire journal)
 
 **Architecture Application Layer :**
 - ✅ **CQRS sans MediatR** : Commands (écriture) + Queries (lecture)
@@ -62,8 +62,8 @@
 - ✅ Application en production : https://kairudev-prod.azurewebsites.net
 - ✅ Redéploiement : `powershell -ExecutionPolicy Bypass -File .\infra\deploy-linux.ps1 -Environment prod`
 
-**Tests :** 213 au total ✅ (126 Domain + 87 Application)
-⚠️ **Dette technique** : `Kairudev.Infrastructure.Tests` supprimé de la solution (résidu bin/obj uniquement). `Kairudev.IntegrationTests` non maintenu — step definitions obsolètes vs domain refactorisé
+**Tests :** 221 au total ✅ (126 Domain + 95 Application)
+⚠️ **Dette technique** : `Kairudev.Infrastructure.Tests` supprimé de la solution (résidu bin/obj uniquement). `Kairudev.IntegrationTests` non maintenu — step definitions obsolètes vs domain refactorisé. **ADR-005** : `SprintSession` à fusionner avec `PomodoroSession` en itération #23.
 
 **Infrastructure :** API REST, Blazor WASM, .NET MAUI, SQLite (local) + **Azure SQL (prod)**
 
@@ -102,13 +102,58 @@
 | ~~#18~~ | ~~Éditeur Markdown + navigation pages dédiées — Markdig, onglets Éditer/Prévisualiser, pages TaskDetail/TaskEdit, suppression modale~~ | ~~✅ Livré~~ | ~~2026-03-20~~ |
 | ~~#19~~ | ~~Retrait Jira (pages + configuration UI) — suppression pages Tickets Web/MAUI, retrait menu, retrait config Jira dans Settings, retrait endpoint API `/api/settings/jira`~~ | ~~✅ Livré~~ | ~~2026-03-23~~ |
 | ~~#20~~ | ~~Filtrage et tri des tâches — défaut ouvertes + récentes, recherche titre, filtre statut, côté serveur~~ | ~~✅ Livré~~ | ~~2026-03-24~~ |
-| **#21** | **Tags sur les tâches — Value Object `TaskTag`, saisie chips/badges (création + édition), affichage couleurs automatiques, max 5, JSON en base** | **✅ Livré** | **2026-03-25** |
+| **#22** | **Note sur le sprint libre — champ Note remplace Nom, persistée comme JournalComment, éditable dans le journal** | **✅ Livré** | **2026-03-25** |
+| ~~#21~~ | ~~Tags sur les tâches — Value Object `TaskTag`, saisie chips/badges (création + édition), affichage couleurs automatiques, max 5, JSON en base~~ | ~~✅ Livré~~ | ~~2026-03-25~~ |
 
 ---
 
 ## Dernière itération livrée
 
+**#22 — Note sur le sprint libre** — Livré le 2026-03-25
+
+### Ce qui a été livré
+
+**Application (CQRS)** ✅
+- `CreateEntryCommand` : `+ string? InitialComment = null`
+- `CreateEntryCommandHandler` : si `InitialComment` non vide → `entry.AddComment(InitialComment.Trim())`
+- `RecordSprintCommand` : `Name?` → `Note?`
+- `RecordSprintCommandHandler` : nom toujours `null` (auto "Sprint #N") ; `Note` passée comme `InitialComment` sur l'entrée de fin
+
+**API** ✅
+- `RecordSprintBody` : `Name?` → `Note?`
+
+**UI Web (Blazor WASM)** ✅
+- `SprintDto.RecordSprintRequest` : `Name?` → `Note?`
+- `SprintLibre.razor` : champ "Note (optionnelle)" remplace "Nom du sprint" ; nom toujours auto affiché "Sprint #N en cours"
+
+**UI MAUI (Blazor Hybrid)** ✅
+- Identique Web
+
+**Tests** ✅ (+8 tests, total 221)
+- `RecordSprintCommandHandlerTests` : mise à jour (suppression `Should_Fail_When_NameExceedsMaxLength`, `Should_UseDefaultName_When_NameIsEmpty` → `Should_AlwaysUseAutoName_When_SprintIsRecorded`) + 4 nouveaux tests note
+- `CreateEntryCommandHandlerTests` : +4 nouveaux tests `InitialComment`
+
+**Documentation** ✅
+- `ADR-005` : Sprint libre = Pomodoro à durée inconnue, fusion prévue #23
+- `spec.md` : UC-SP-01 mis à jour (critères, scénario nominal)
+- `project-state.md` : mis à jour
+
+### Impact
+- Sur `/pomodoro/libre`, le nom du sprint est toujours auto-généré "Sprint #N"
+- Une note optionnelle peut être saisie avant le démarrage
+- Si non vide, elle apparaît dans le journal du jour comme commentaire sur l'entrée de fin
+- La note est modifiable depuis le journal (comportement natif existant)
+
+### Dette technique introduite
+- ADR-005 : `SprintSession` à fusionner avec `PomodoroSession` en itération #23
+- Bug latent connu : `JournalEntryMapper` ne résout pas les tâches liées aux sprints libres (lookup `PomodoroSessionId` → échec silencieux)
+
+---
+
+## Itération précédente
+
 **#21 — Tags sur les tâches** — Livré le 2026-03-25
+
 
 ### Ce qui a été livré
 

@@ -29,20 +29,19 @@ public sealed class RecordSprintCommandHandlerTests
     public async Task Should_PersistSession_When_CommandIsValid()
     {
         var (handler, sprintRepo, _) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Completed", null, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Completed", null, 1);
 
         var result = await handler.Handle(command);
 
         Assert.True(result.IsSuccess);
         Assert.Single(sprintRepo.Sessions);
-        Assert.Equal("Focus", sprintRepo.Sessions[0].Name.Value);
     }
 
     [Fact]
-    public async Task Should_UseDefaultName_When_NameIsEmpty()
+    public async Task Should_AlwaysUseAutoName_When_SprintIsRecorded()
     {
         var (handler, sprintRepo, _) = BuildHandler();
-        var command = new RecordSprintCommand("", StartedAt, EndedAt, "Completed", null, 3);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Completed", null, 3);
 
         var result = await handler.Handle(command);
 
@@ -55,13 +54,13 @@ public sealed class RecordSprintCommandHandlerTests
     public async Task Should_ReturnViewModel_When_SessionIsRecorded()
     {
         var (handler, _, _) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Completed", null, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Completed", null, 1);
 
         var result = await handler.Handle(command);
 
         Assert.True(result.IsSuccess);
         var session = result.Session!;
-        Assert.Equal("Focus", session.Name);
+        Assert.Equal("Sprint #1", session.Name);
         Assert.Equal(StartedAt, session.StartedAt);
         Assert.Equal(EndedAt, session.EndedAt);
         Assert.Equal("Completed", session.Outcome);
@@ -74,7 +73,7 @@ public sealed class RecordSprintCommandHandlerTests
     {
         var (handler, sprintRepo, _) = BuildHandler();
         var taskId = Guid.NewGuid();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Completed", taskId, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Completed", taskId, 1);
 
         var result = await handler.Handle(command);
 
@@ -87,7 +86,7 @@ public sealed class RecordSprintCommandHandlerTests
     public async Task Should_RecordInterruptedOutcome_When_OutcomeIsInterrupted()
     {
         var (handler, sprintRepo, _) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Interrupted", null, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Interrupted", null, 1);
 
         var result = await handler.Handle(command);
 
@@ -100,7 +99,7 @@ public sealed class RecordSprintCommandHandlerTests
     public async Task Should_CreateTwoJournalEntries_When_SessionIsCompleted()
     {
         var (handler, _, journalRepo) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Completed", null, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Completed", null, 1);
 
         await handler.Handle(command);
 
@@ -113,7 +112,7 @@ public sealed class RecordSprintCommandHandlerTests
     public async Task Should_CreateTwoJournalEntries_When_SessionIsInterrupted()
     {
         var (handler, _, journalRepo) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Interrupted", null, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Interrupted", null, 1);
 
         await handler.Handle(command);
 
@@ -126,7 +125,7 @@ public sealed class RecordSprintCommandHandlerTests
     public async Task Should_CreateJournalEntriesWithRetroactiveTimestamps_When_SessionIsRecorded()
     {
         var (handler, _, journalRepo) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Completed", null, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Completed", null, 1);
 
         await handler.Handle(command);
 
@@ -138,10 +137,72 @@ public sealed class RecordSprintCommandHandlerTests
     }
 
     [Fact]
+    public async Task Should_AddNoteAsCommentOnCompletionEntry_When_NoteIsProvided()
+    {
+        var (handler, _, journalRepo) = BuildHandler();
+        var command = new RecordSprintCommand("Daily trop long", StartedAt, EndedAt, "Completed", null, 1);
+
+        await handler.Handle(command);
+
+        var completionEntry = journalRepo.Entries.Single(e => e.EventType == JournalEventType.SprintCompleted);
+        Assert.Single(completionEntry.Comments);
+        Assert.Equal("Daily trop long", completionEntry.Comments[0].Text);
+    }
+
+    [Fact]
+    public async Task Should_AddNoteAsCommentOnInterruptedEntry_When_NoteIsProvided()
+    {
+        var (handler, _, journalRepo) = BuildHandler();
+        var command = new RecordSprintCommand("Réunion annulée", StartedAt, EndedAt, "Interrupted", null, 1);
+
+        await handler.Handle(command);
+
+        var interruptedEntry = journalRepo.Entries.Single(e => e.EventType == JournalEventType.SprintInterrupted);
+        Assert.Single(interruptedEntry.Comments);
+        Assert.Equal("Réunion annulée", interruptedEntry.Comments[0].Text);
+    }
+
+    [Fact]
+    public async Task Should_NotAddComment_When_NoteIsNullOrEmpty()
+    {
+        var (handler, _, journalRepo) = BuildHandler();
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Completed", null, 1);
+
+        await handler.Handle(command);
+
+        var completionEntry = journalRepo.Entries.Single(e => e.EventType == JournalEventType.SprintCompleted);
+        Assert.Empty(completionEntry.Comments);
+    }
+
+    [Fact]
+    public async Task Should_NotAddComment_When_NoteIsWhitespace()
+    {
+        var (handler, _, journalRepo) = BuildHandler();
+        var command = new RecordSprintCommand("   ", StartedAt, EndedAt, "Completed", null, 1);
+
+        await handler.Handle(command);
+
+        var completionEntry = journalRepo.Entries.Single(e => e.EventType == JournalEventType.SprintCompleted);
+        Assert.Empty(completionEntry.Comments);
+    }
+
+    [Fact]
+    public async Task Should_NotAddCommentOnStartEntry_When_NoteIsProvided()
+    {
+        var (handler, _, journalRepo) = BuildHandler();
+        var command = new RecordSprintCommand("une note", StartedAt, EndedAt, "Completed", null, 1);
+
+        await handler.Handle(command);
+
+        var startEntry = journalRepo.Entries.Single(e => e.EventType == JournalEventType.SprintStarted);
+        Assert.Empty(startEntry.Comments);
+    }
+
+    [Fact]
     public async Task Should_Fail_When_EndedAtIsBeforeStartedAt()
     {
         var (handler, _, _) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", EndedAt, StartedAt, "Completed", null, 1);
+        var command = new RecordSprintCommand(null, EndedAt, StartedAt, "Completed", null, 1);
 
         var result = await handler.Handle(command);
 
@@ -153,24 +214,12 @@ public sealed class RecordSprintCommandHandlerTests
     public async Task Should_Fail_When_OutcomeIsInvalid()
     {
         var (handler, _, _) = BuildHandler();
-        var command = new RecordSprintCommand("Focus", StartedAt, EndedAt, "Unknown", null, 1);
+        var command = new RecordSprintCommand(null, StartedAt, EndedAt, "Unknown", null, 1);
 
         var result = await handler.Handle(command);
 
         Assert.False(result.IsSuccess);
         Assert.NotNull(result.Error);
     }
-
-    [Fact]
-    public async Task Should_Fail_When_NameExceedsMaxLength()
-    {
-        var (handler, _, _) = BuildHandler();
-        var longName = new string('x', 201);
-        var command = new RecordSprintCommand(longName, StartedAt, EndedAt, "Completed", null, 1);
-
-        var result = await handler.Handle(command);
-
-        Assert.False(result.IsSuccess);
-        Assert.Equal(SprintDomainErrors.Sprint.NameTooLong, result.Error);
-    }
 }
+
