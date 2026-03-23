@@ -209,8 +209,8 @@ namespace Kairudev.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("JiraTicketKey")
                         .HasMaxLength(50)

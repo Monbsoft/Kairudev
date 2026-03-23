@@ -5,6 +5,7 @@
 @inject TicketApiClient TicketApi
 @inject MauiAuthService AuthService
 @inject NavigationManager Nav
+@inject MarkdownService MarkdownSvc
 
 <h2>Tâches du jour</h2>
 
@@ -43,69 +44,50 @@ else
         @foreach (var task in tasks)
         {
             <li class="list-group-item">
-                @if (editingTaskId == task.Id)
-                {
-                    <div class="mb-2">
-                        <input class="form-control mb-2"
-                               @bind="editTitle"
-                               @bind:event="oninput"
-                               placeholder="Titre…" />
-                        <textarea class="form-control mb-2"
-                                  @bind="editDescription"
-                                  @bind:event="oninput"
-                                  placeholder="Description (optionnelle)…"
-                                  rows="2"></textarea>
-                        <button class="btn btn-sm btn-primary me-2" @onclick="() => SaveEdit(task.Id)">Enregistrer</button>
-                        <button class="btn btn-sm btn-secondary" @onclick="CancelEdit">Annuler</button>
-                    </div>
-                }
-                else
-                {
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <div class="@(task.Status == "Done" ? "text-decoration-line-through text-muted" : "")">
-                                <strong>@task.Title</strong>
-                                @if (!string.IsNullOrWhiteSpace(task.JiraTicketKey))
-                                {
-                                    <span class="badge bg-primary ms-2">@task.JiraTicketKey</span>
-                                }
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="@(task.Status == "Done" ? "text-decoration-line-through text-muted" : "")">
+                            <button class="btn btn-link p-0 text-start fw-bold" @onclick="() => NavigateToDetail(task.Id)">@task.Title</button>
+                            @if (!string.IsNullOrWhiteSpace(task.JiraTicketKey))
+                            {
+                                <span class="badge bg-primary ms-2">@task.JiraTicketKey</span>
+                            }
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(task.Description))
+                        {
+                            <div class="text-muted small mt-1">@((MarkupString)MarkdownSvc.Render(task.Description))</div>
+                        }
+                        @if (linkingTaskId == task.Id)
+                        {
+                            <div class="d-flex gap-2 mt-1">
+                                <input class="form-control form-control-sm"
+                                       style="max-width: 150px"
+                                       placeholder="PROJ-123"
+                                       @bind="linkJiraKeyInput"
+                                       @bind:event="oninput" />
+                                <button class="btn btn-sm btn-primary" @onclick="() => SaveJiraLink(task.Id)">Lier</button>
+                                <button class="btn btn-sm btn-secondary" @onclick="CancelJiraLink">Annuler</button>
                             </div>
-                            @if (!string.IsNullOrWhiteSpace(task.Description))
-                            {
-                                <small class="text-muted d-block mt-1">@task.Description</small>
-                            }
-                            @if (linkingTaskId == task.Id)
-                            {
-                                <div class="d-flex gap-2 mt-1">
-                                    <input class="form-control form-control-sm"
-                                           style="max-width: 150px"
-                                           placeholder="PROJ-123"
-                                           @bind="linkJiraKeyInput"
-                                           @bind:event="oninput" />
-                                    <button class="btn btn-sm btn-primary" @onclick="() => SaveJiraLink(task.Id)">Lier</button>
-                                    <button class="btn btn-sm btn-secondary" @onclick="CancelJiraLink">Annuler</button>
-                                </div>
-                            }
-                        </div>
-                        <div class="d-flex gap-2 align-items-center ms-3">
-                            <span class="badge @StatusBadgeClass(task.Status)">@task.Status</span>
-                            @if (task.Status != "Done")
-                            {
-                                <button class="btn btn-sm btn-outline-primary" @onclick="() => StartEdit(task)" title="Modifier">✎</button>
-                                <button class="btn btn-sm btn-success" @onclick="() => CompleteTask(task.Id)" title="Compléter">✓</button>
-                            }
-                            @if (string.IsNullOrWhiteSpace(task.JiraTicketKey))
-                            {
-                                <button class="btn btn-sm btn-outline-info" @onclick="() => StartJiraLink(task.Id)" title="Lier Jira">J+</button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-sm btn-outline-warning" @onclick="() => UnlinkJira(task.Id)" title="Delirer Jira">J-</button>
-                            }
-                            <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteTask(task.Id)" title="Supprimer">✕</button>
-                        </div>
+                        }
                     </div>
-                }
+                    <div class="d-flex gap-2 align-items-center ms-3">
+                        <span class="badge @MarkdownService.StatusBadgeClass(task.Status)">@task.Status</span>
+                        @if (task.Status != "Done")
+                        {
+                            <button class="btn btn-sm btn-outline-primary" @onclick="() => NavigateToEdit(task.Id)" title="Modifier">&#x270E;</button>
+                            <button class="btn btn-sm btn-success" @onclick="() => CompleteTask(task.Id)" title="Compléter">&#x2713;</button>
+                        }
+                        @if (string.IsNullOrWhiteSpace(task.JiraTicketKey))
+                        {
+                            <button class="btn btn-sm btn-outline-info" @onclick="() => StartJiraLink(task.Id)" title="Lier Jira">J+</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-outline-warning" @onclick="() => UnlinkJira(task.Id)" title="Délier Jira">J-</button>
+                        }
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteTask(task.Id)" title="Supprimer">&#x2715;</button>
+                    </div>
+                </div>
             </li>
         }
     </ul>
@@ -117,10 +99,6 @@ else
     private string newDescription = string.Empty;
     private string? errorMessage;
 
-    private Guid? editingTaskId;
-    private string editTitle = string.Empty;
-    private string editDescription = string.Empty;
-
     private Guid? linkingTaskId;
     private string linkJiraKeyInput = string.Empty;
 
@@ -131,8 +109,13 @@ else
             Nav.NavigateTo("/login", forceLoad: false);
             return;
         }
-        tasks = await Api.GetAllAsync();
+        var all = await Api.GetAllAsync();
+        tasks = [.. all.OrderByDescending(t => t.CreatedAt)];
     }
+
+    private void NavigateToDetail(Guid id) => Nav.NavigateTo($"/tasks/{id}");
+
+    private void NavigateToEdit(Guid id) => Nav.NavigateTo($"/tasks/{id}/edit");
 
     private async Task AddTask()
     {
@@ -152,43 +135,14 @@ else
         }
     }
 
-    private void StartEdit(TaskDto task)
-    {
-        editingTaskId = task.Id;
-        editTitle = task.Title;
-        editDescription = task.Description ?? string.Empty;
-    }
-
-    private async Task SaveEdit(Guid id)
-    {
-        errorMessage = null;
-        var description = string.IsNullOrWhiteSpace(editDescription) ? null : editDescription.Trim();
-        var updated = await Api.UpdateAsync(id, editTitle.Trim(), description);
-        if (updated is not null)
-        {
-            var index = tasks!.FindIndex(t => t.Id == id);
-            if (index >= 0)
-                tasks[index] = updated;
-            CancelEdit();
-        }
-        else
-        {
-            errorMessage = "Erreur lors de la modification de la tâche.";
-        }
-    }
-
-    private void CancelEdit()
-    {
-        editingTaskId = null;
-        editTitle = string.Empty;
-        editDescription = string.Empty;
-    }
-
     private async Task CompleteTask(Guid id)
     {
         errorMessage = null;
         if (await Api.CompleteAsync(id))
-            tasks = await Api.GetAllAsync();
+        {
+            var all = await Api.GetAllAsync();
+            tasks = [.. all.OrderByDescending(t => t.CreatedAt)];
+        }
         else
             errorMessage = "Erreur lors de la complétion.";
     }
@@ -221,12 +175,13 @@ else
 
         if (await TicketApi.LinkAsync(taskId, linkJiraKeyInput.Trim()))
         {
-            tasks = await Api.GetAllAsync();
+            var all = await Api.GetAllAsync();
+            tasks = [.. all.OrderByDescending(t => t.CreatedAt)];
             CancelJiraLink();
         }
         else
         {
-            errorMessage = "Erreur lors de la liaison Jira. Verifiez la cle saisie.";
+            errorMessage = "Erreur lors de la liaison Jira. Vérifiez la clé saisie.";
         }
     }
 
@@ -234,7 +189,10 @@ else
     {
         errorMessage = null;
         if (await TicketApi.UnlinkAsync(taskId))
-            tasks = await Api.GetAllAsync();
+        {
+            var all = await Api.GetAllAsync();
+            tasks = [.. all.OrderByDescending(t => t.CreatedAt)];
+        }
         else
             errorMessage = "Erreur lors de la suppression du lien Jira.";
     }
@@ -245,10 +203,4 @@ else
         linkJiraKeyInput = string.Empty;
     }
 
-    private static string StatusBadgeClass(string status) => status switch
-    {
-        "Done" => "bg-success",
-        "InProgress" => "bg-warning text-dark",
-        _ => "bg-secondary"
-    };
 }
