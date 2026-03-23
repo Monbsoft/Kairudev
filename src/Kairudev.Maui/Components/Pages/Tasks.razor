@@ -1,4 +1,5 @@
 @page "/tasks"
+@implements IDisposable
 @using Kairudev.Maui.Services
 @using Kairudev.Maui.Auth
 @inject TaskApiClient Api
@@ -29,7 +30,7 @@
            placeholder="Rechercher par titre…"
            value="@searchTerm"
            @oninput="OnSearchInput" />
-    <select class="form-select" style="max-width: 180px;" @onchange="OnStatusChanged">
+    <select class="form-select" style="max-width: 180px;" value="@statusFilter" @onchange="OnStatusChanged">
         <option value="OpenOnly">Ouvertes</option>
         <option value="All">Toutes</option>
         <option value="Pending">En attente</option>
@@ -170,4 +171,6 @@ else
         if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(newTitle))
             await AddTask();
     }
+
+    public void Dispose() => _debounceToken?.Dispose();
 }

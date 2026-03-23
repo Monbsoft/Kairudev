@@ -33,7 +33,7 @@ internal sealed class EfCoreTaskRepository : ITaskRepository
         }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
-            query = query.Where(t => t.Title.Value.Contains(searchTerm));
+            query = query.Where(t => EF.Functions.Like(t.Title.Value, $"%{searchTerm}%"));
 
         return await query.OrderByDescending(t => t.CreatedAt).ToListAsync(cancellationToken);
     }
