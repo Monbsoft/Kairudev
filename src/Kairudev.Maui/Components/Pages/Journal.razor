@@ -1,6 +1,7 @@
 @page "/journal"
 @using Kairudev.Maui.Services
 @using Kairudev.Maui.Auth
+@using Kairudev.Maui.Helpers
 @inject JournalApiClient Api
 @inject MauiAuthService AuthService
 @inject NavigationManager Nav
@@ -42,12 +43,18 @@ else
                             <strong>@GetEventLabel(entry)</strong>
                         </div>
 
-                        @if (entry.LinkedTaskTitles.Count > 0)
+                        @if (entry.LinkedTasks.Count > 0)
                         {
                             <ul class="list-unstyled small text-muted ms-2 mb-1">
-                                @foreach (var title in entry.LinkedTaskTitles)
+                                @foreach (var task in entry.LinkedTasks)
                                 {
-                                    <li>→ @title</li>
+                                    <li class="d-flex align-items-center gap-1 flex-wrap">
+                                        <span>→ @task.Title</span>
+                                        @foreach (var tag in task.Tags)
+                                        {
+                                            <span class="badge @TagColorClass(tag)">@tag</span>
+                                        }
+                                    </li>
                                 }
                             </ul>
                         }
@@ -270,4 +277,6 @@ else
         "TaskCompleted"     => "Tâche complétée",
         _                   => entry.EventType
     };
+
+    private static string TagColorClass(string tag) => TagColors.GetClass(tag);
 }

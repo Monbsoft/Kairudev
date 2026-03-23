@@ -1,6 +1,7 @@
 @page "/journal"
 @attribute [Authorize]
 @using Kairudev.Web.Services
+@using Kairudev.Web.Helpers
 @inject JournalApiClient Api
 
 <div class="notebook">
@@ -41,7 +42,7 @@
             <div class="notebook-timeline">
                 @foreach (var entry in entries)
                 {
-                    <div class="nb-entry nb-@GetEntryVariant(entry.EventType)">
+                    <div class="nb-entry nb-@JournalEntryMeta.GetVariant(entry.EventType)">
                         <div class="nb-time">@entry.OccurredAt.ToLocalTime().ToString("HH:mm")</div>
                         <div class="nb-dot-col">
                             <div class="nb-dot"></div>
@@ -49,18 +50,24 @@
                         </div>
                         <div class="nb-content">
                             <div class="nb-event">
-                                <span class="nb-icon">@GetEventIcon(entry.EventType)</span>
-                                <span class="nb-label">@GetEventLabel(entry)</span>
+                                <span class="nb-icon">@JournalEntryMeta.GetIcon(entry.EventType)</span>
+                                <span class="nb-label">@JournalEntryMeta.GetLabel(entry)</span>
                             </div>
 
-                            @if (entry.LinkedTaskTitles.Count > 0)
+                            @if (entry.LinkedTasks.Count > 0)
                             {
                                 <div class="nb-tasks">
                                     <span class="nb-tasks-header">Tâches travaillées</span>
                                     <ul class="nb-tasks-list">
-                                        @foreach (var title in entry.LinkedTaskTitles)
+                                        @foreach (var task in entry.LinkedTasks)
                                         {
-                                            <li>@title</li>
+                                            <li>
+                                                <span>@task.Title</span>
+                                                @foreach (var tag in task.Tags)
+                                                {
+                                                    <span class="badge @TagColors.GetClass(tag)">@tag</span>
+                                                }
+                                            </li>
                                         }
                                     </ul>
                                 </div>
@@ -91,21 +98,24 @@
                                 </div>
                             }
 
-                            @if (addingCommentForEntryId == entry.Id)
+                            @if (JournalEntryMeta.CanAddComment(entry.EventType))
                             {
-                                <div class="nb-add-comment mt-2">
-                                    <textarea class="form-control form-control-sm mb-1"
-                                              placeholder="Votre note…"
-                                              @bind="newCommentText"
-                                              @bind:event="oninput"
-                                              rows="2"></textarea>
-                                    <button class="btn btn-sm btn-primary me-1" @onclick="() => SaveAddComment(entry.Id)">Ajouter</button>
-                                    <button class="btn btn-sm btn-outline-secondary" @onclick="CancelAddComment">Annuler</button>
-                                </div>
-                            }
-                            else
-                            {
-                                <button class="nb-add-btn" @onclick="() => StartAddComment(entry.Id)">+ note</button>
+                                @if (addingCommentForEntryId == entry.Id)
+                                {
+                                    <div class="nb-add-comment mt-2">
+                                        <textarea class="form-control form-control-sm mb-1"
+                                                  placeholder="Votre note…"
+                                                  @bind="newCommentText"
+                                                  @bind:event="oninput"
+                                                  rows="2"></textarea>
+                                        <button class="btn btn-sm btn-primary me-1" @onclick="() => SaveAddComment(entry.Id)">Ajouter</button>
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="CancelAddComment">Annuler</button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <button class="nb-add-btn" @onclick="() => StartAddComment(entry.Id)">+ note</button>
+                                }
                             }
                         </div>
                     </div>
@@ -369,7 +379,6 @@
         font-size: 0.75rem;
     }
 
-    /* ── Commentaires ────────────────────────────────────── */
     .nb-comment {
         margin: 0.3rem 0 0 1.4rem;
     }
@@ -496,44 +505,6 @@
 
     private string GetDateFull() =>
         _displayDate.ToString("d MMMM yyyy", Fr);
-
-    // ── Helpers entrée ────────────────────────────────────
-
-    private static string GetEntryVariant(string eventType) => eventType switch
-    {
-        "SprintStarted" or "SprintCompleted"    => "sprint",
-        "SprintInterrupted"                     => "warn",
-        "BreakStarted"  or "BreakCompleted"     => "break",
-        "BreakInterrupted"                      => "warn",
-        "TaskStarted"   or "TaskCompleted"      => "task",
-        _                                       => "sprint"
-    };
-
-    private static string GetEventIcon(string eventType) => eventType switch
-    {
-        "SprintStarted"     => "🍅",
-        "SprintCompleted"   => "✅",
-        "SprintInterrupted" => "⏸️",
-        "BreakStarted"      => "☕",
-        "BreakCompleted"    => "🌿",
-        "BreakInterrupted"  => "⚡",
-        "TaskStarted"       => "🚀",
-        "TaskCompleted"     => "🎉",
-        _                   => "📌"
-    };
-
-    private static string GetEventLabel(JournalEntryDto entry) => entry.EventType switch
-    {
-        "SprintStarted"     => entry.Sequence.HasValue ? $"Sprint #{entry.Sequence} démarré"    : "Sprint démarré",
-        "SprintCompleted"   => entry.Sequence.HasValue ? $"Sprint #{entry.Sequence} complété"   : "Sprint complété",
-        "SprintInterrupted" => entry.Sequence.HasValue ? $"Sprint #{entry.Sequence} interrompu" : "Sprint interrompu",
-        "BreakStarted"      => entry.Sequence.HasValue ? $"Pause #{entry.Sequence} démarrée"    : "Pause démarrée",
-        "BreakCompleted"    => entry.Sequence.HasValue ? $"Pause #{entry.Sequence} terminée"    : "Pause terminée",
-        "BreakInterrupted"  => entry.Sequence.HasValue ? $"Pause #{entry.Sequence} interrompue" : "Pause interrompue",
-        "TaskStarted"       => "Tâche démarrée",
-        "TaskCompleted"     => "Tâche complétée",
-        _                   => entry.EventType
-    };
 
     // ── Actions commentaires ──────────────────────────────
 
