@@ -28,7 +28,12 @@ public sealed class DeveloperTask : AggregateRoot<TaskId>
     public JiraTicketKey? JiraTicketKey { get; private set; }
 
     public IReadOnlyList<TaskTag> Tags =>
-        _tagValues.ConvertAll(v => TaskTag.Create(v).Value).AsReadOnly();
+        _tagValues
+            .Select(v => TaskTag.Create(v))
+            .Where(r => r.IsSuccess)
+            .Select(r => r.Value)
+            .ToList()
+            .AsReadOnly();
 
     // Public for EF Core materialization — domain consumers use Tags
     public List<string> TagValues
