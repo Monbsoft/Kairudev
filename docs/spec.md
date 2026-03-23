@@ -5,6 +5,19 @@ Application de gestion d'activité quotidienne pour développeurs.
 Elle centralise en un seul endroit tout ce dont un développeur a besoin pour rester focus et organisé :
 todo list de micro-tâches, journal de bord, sessions Pomodoro.
 
+### Itération #22 — Note sur le sprint libre
+
+**Objectif :** Sur `/pomodoro/libre`, le champ texte n'est plus le nom du sprint. C'est une note optionnelle ajoutée au journal à la fin du sprint.
+
+**Périmètre :**
+- suppression du champ "Nom du sprint" — le nom est toujours auto-généré `"Sprint #N"` ;
+- ajout d'un champ "Note (optionnelle)" avant le démarrage ;
+- si la note est non vide, elle est persistée comme `JournalComment` sur l'entrée `SprintCompleted` ou `SprintInterrupted` ;
+- la note est modifiable depuis le journal du jour (comportement natif des commentaires).
+
+**Hors périmètre :**
+- fusion `SprintSession` / `PomodoroSession` (voir ADR-005, prévu en itération #23).
+
 ### Itération #19 — Retrait Jira (pages + configuration UI)
 
 **Objectif :** désactiver Jira côté expérience utilisateur sans supprimer le BC Tickets côté backend/domain.
@@ -1767,16 +1780,17 @@ classDiagram
 
 **Scénario nominal :**
 1. L'utilisateur est sur `/pomodoro`, clique **`···`** → **"Sprint libre"** → arrive sur `/pomodoro/libre`
-2. Il voit le champ "Nom du sprint" (défaut : "Sprint #N", N = nb sprints du jour + 1)
-3. Il modifie le nom si souhaité (seulement avant démarrage)
+2. Il voit le champ "Note (optionnelle)" et un dropdown tâche liée
+3. Il saisit une note si souhaité (seulement avant démarrage)
 4. Il sélectionne optionnellement une tâche liée dans un dropdown
-5. Il clique **Démarrer** → le client mémorise `startedAt = now`, le chronomètre s'incrémente
-6. Il clique **Terminer** → le client appelle `POST /api/sprints` avec `outcome=Completed`
-7. Le sprint apparaît dans l'historique du jour (bas de page)
+5. Il clique **Démarrer** → le client mémorise `startedAt = now`, le chronomètre s'incrémente ; le nom est toujours `"Sprint #N"` (auto)
+6. Il clique **Terminer** → le client appelle `POST /api/sprints` avec `outcome=Completed` et `note`
+7. Si la note est non vide, un `JournalComment` est créé sur l'entrée `SprintCompleted`
+8. Le sprint apparaît dans l'historique du jour (bas de page)
 
 **Scénarios alternatifs :**
-- A1 : Clic sur **Interrompre** → `POST /api/sprints` avec `outcome=Interrupted`, durée réelle enregistrée
-- A2 : Nom vide → nom par défaut "Sprint #N"
+- A1 : Clic sur **Interrompre** → `POST /api/sprints` avec `outcome=Interrupted`, note ajoutée sur `SprintInterrupted`
+- A2 : Note vide → aucun commentaire créé
 - A3 : Aucune tâche sélectionnée → `linkedTaskId = null`
 
 **Scénarios d'exception :**
@@ -1784,14 +1798,17 @@ classDiagram
 - E2 : `endedAt <= startedAt` → erreur de validation domaine
 
 **Critères d'acceptance :**
-- [ ] Bouton `···` visible sur `/pomodoro`, ouvre un menu avec l'option "Sprint libre"
-- [ ] "Sprint libre" navigue vers `/pomodoro/libre`
-- [ ] Pas d'entrée dédiée dans le NavMenu
-- [ ] Le chronomètre s'incrémente en temps réel (PeriodicTimer côté client)
-- [ ] Le nom n'est plus modifiable une fois le sprint démarré
-- [ ] La durée réelle (`endedAt - startedAt`) est persistée
-- [ ] Le journal reçoit `SprintStarted` (timestamp = `startedAt`) + `SprintCompleted/Interrupted`
-- [ ] L'historique du jour liste les sprints enregistrés avec nom, durée et résultat
+- [x] Bouton `···` visible sur `/pomodoro`, ouvre un menu avec l'option "Sprint libre"
+- [x] "Sprint libre" navigue vers `/pomodoro/libre`
+- [x] Pas d'entrée dédiée dans le NavMenu
+- [x] Le chronomètre s'incrémente en temps réel (PeriodicTimer côté client)
+- [x] Le nom du sprint est toujours `"Sprint #N"` (non modifiable)
+- [x] Un champ "Note (optionnelle)" est disponible avant le démarrage
+- [x] Si note non vide → `JournalComment` ajouté sur l'entrée de fin (`SprintCompleted` ou `SprintInterrupted`)
+- [x] Si note vide → aucun commentaire créé
+- [x] La note est modifiable depuis le journal du jour
+- [x] La durée réelle (`endedAt - startedAt`) est persistée
+- [x] L'historique du jour liste les sprints enregistrés avec nom, durée et résultat
 
 ### UC-SP-02 — Consulter les sprints du jour
 

@@ -47,6 +47,10 @@ public sealed class CreateEntryCommandHandler : ICommandHandler<CreateEntryComma
             }
 
             var entry = JournalEntry.Create(command.EventType, command.ResourceId, command.OccurredAt, command.OwnerId, sequence);
+
+            if (!string.IsNullOrWhiteSpace(command.InitialComment))
+                entry.AddComment(command.InitialComment.Trim());
+
             await _repository.AddAsync(entry, cancellationToken);
             _logger.LogInformation("Journal entry {EventType} created for resource {ResourceId} by user {OwnerId}", command.EventType, command.ResourceId, command.OwnerId);
             return CreateEntryResult.Success();

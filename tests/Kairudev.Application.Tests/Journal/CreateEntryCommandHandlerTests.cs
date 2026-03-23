@@ -117,4 +117,47 @@ public sealed class CreateEntryCommandHandlerTests
 
         Assert.True(result.IsSuccess);
     }
+
+    // ── InitialComment ────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task Should_AddComment_When_InitialCommentIsProvided()
+    {
+        var command = new CreateEntryCommand(JournalEventType.SprintCompleted, Guid.NewGuid(), DateTime.UtcNow, OwnerId, "Daily trop long");
+
+        await _sut.Handle(command);
+
+        Assert.Single(_repository.Entries[0].Comments);
+        Assert.Equal("Daily trop long", _repository.Entries[0].Comments[0].Text);
+    }
+
+    [Fact]
+    public async Task Should_TrimComment_When_InitialCommentHasLeadingOrTrailingSpaces()
+    {
+        var command = new CreateEntryCommand(JournalEventType.SprintCompleted, Guid.NewGuid(), DateTime.UtcNow, OwnerId, "  ma note  ");
+
+        await _sut.Handle(command);
+
+        Assert.Equal("ma note", _repository.Entries[0].Comments[0].Text);
+    }
+
+    [Fact]
+    public async Task Should_NotAddComment_When_InitialCommentIsNull()
+    {
+        var command = new CreateEntryCommand(JournalEventType.SprintCompleted, Guid.NewGuid(), DateTime.UtcNow, OwnerId, null);
+
+        await _sut.Handle(command);
+
+        Assert.Empty(_repository.Entries[0].Comments);
+    }
+
+    [Fact]
+    public async Task Should_NotAddComment_When_InitialCommentIsWhitespace()
+    {
+        var command = new CreateEntryCommand(JournalEventType.SprintCompleted, Guid.NewGuid(), DateTime.UtcNow, OwnerId, "   ");
+
+        await _sut.Handle(command);
+
+        Assert.Empty(_repository.Entries[0].Comments);
+    }
 }

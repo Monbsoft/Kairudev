@@ -25,7 +25,7 @@ public sealed class SprintsController : ControllerBase
         CancellationToken ct)
     {
         var command = new RecordSprintCommand(
-            body.Name,
+            body.Note,
             body.StartedAt,
             body.EndedAt,
             body.Outcome,
@@ -49,7 +49,7 @@ public sealed class SprintsController : ControllerBase
 }
 
 public sealed record RecordSprintBody(
-    string? Name,
+    string? Note,
     DateTimeOffset StartedAt,
     DateTimeOffset EndedAt,
     string Outcome,
