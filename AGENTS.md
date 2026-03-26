@@ -432,13 +432,28 @@ Si le modèle change en cours d'itération, les diagrammes concernés sont mis �
 
 ---
 
+## Commandes slash disponibles
+
+Ces commandes invoquent directement l'agent correspondant via `/nom` :
+
+| Commande    | Agent déclenché | Usage typique |
+|-------------|-----------------|---------------|
+| `/dev`      | Développeur senior .NET / C# | Implémenter, corriger un bug, écrire des tests, migration EF Core |
+| `/arch`     | Architecte logiciel | Modéliser un BC, rédiger un ADR, valider une dépendance |
+| `/pm`       | Product Manager | Clarifier un besoin, rédiger une user story, cadrer une itération |
+| `/relecteur`| Relecteur de commit | Relire le dernier commit, produire un rapport bloquants/avertissements |
+| `/reviewer` | Reviewer de Pull Requests | Relire une PR avant merge |
+| `/blazor`   | Expert Front Blazor / UX | Concevoir/implémenter un composant Blazor, corriger un problème UX |
+
+---
+
 ## Utilisation des sous-agents
 
 Avant de lancer un sous-agent (outil `Agent`), toujours annoncer explicitement à l'utilisateur :
-- **Quel agent** est lancé (ex : `Explore`, `dev`, `arch`, `pm`, `relecteur`)
+- **Quel agent** est lancé (ex : `Explore`, `dev`, `arch`, `pm`, `relecteur`, `reviewer`, `blazor`)
 - **Pourquoi** (tâche déléguée en une ligne)
 
-Exemple : *"Je lance l'agent **Explore** pour inventorier les fichiers Jira dans le projet."*
+Exemple : *"Je lance l'agent **dev** pour implémenter le use case AddTask."*
 
 ---
 
